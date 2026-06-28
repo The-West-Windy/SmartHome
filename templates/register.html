@@ -1,4 +1,4 @@
-{% extends 'students/base.html' %}
+{% extends 'base.html' %}
 
 {% block content %}
 <div class="container d-flex justify-content-center align-items-center py-5" style="min-height: 100vh;">
@@ -11,7 +11,7 @@
         </div>
 
         <form method="post">
-            {% csrf_token %}
+
             
             {% for field in form %}
                 <div class="mb-3">
@@ -29,7 +29,7 @@
         </form>
 
         <div class="text-center mt-4">
-            <small class="text-muted">Вже маєте акаунт? <a href="{% url 'login' %}" class="text-decoration-none">Увійти</a></small>
+            <small class="text-muted">Вже маєте акаунт? <a href="{{ url_for('login') }}" class="text-decoration-none">Увійти</a></small>
         </div>
     </div>
 </div>

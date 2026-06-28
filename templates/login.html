@@ -1,4 +1,4 @@
-{% extends 'students/base.html' %}
+{% extends 'base.html' %}
 
 {% block content %}
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
@@ -21,7 +21,7 @@
         {% endif %}
 
         <form method="post">
-            {% csrf_token %}
+
             <div class="mb-3">
                 <input type="text" name="username" class="form-control form-control-lg" placeholder="Логін" required>
             </div>
@@ -34,7 +34,7 @@
         </form>
 
         <div class="text-center mt-4">
-            <small class="text-muted">Ще не зареєстровані? <a href="{% url 'register' %}" class="text-decoration-none">Створити акаунт</a></small>
+            <small class="text-muted">Ще не зареєстровані? <a href="{{ url_for('register') }}" class="text-decoration-none">Створити акаунт</a></small>
         </div>
     </div>
 </div>

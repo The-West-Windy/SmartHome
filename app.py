@@ -19,7 +19,7 @@ smart_home_data = {
 MQTT_BROKER = "127.0.0.1"
 MQTT_PORT = 1883
 
-z
+
 def on_connect(client, userdata, flags, rc):
     client.subscribe("home/#")
 
@@ -53,8 +53,11 @@ def on_message(client, userdata, msg):
 mqtt_client = mqtt.Client()
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
-mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
-mqtt_client.loop_start()
+try:
+    mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
+    mqtt_client.loop_start()
+except Exception as e:
+    print(f"MQTT connection failed: {e}. Running without MQTT.")
 
 
 @app.route('/')
