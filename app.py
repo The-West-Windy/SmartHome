@@ -19,7 +19,7 @@ smart_home_data = {
 MQTT_BROKER = "127.0.0.1"
 MQTT_PORT = 1883
 
-
+z
 def on_connect(client, userdata, flags, rc):
     client.subscribe("home/#")
 
