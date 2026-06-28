@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Data Manager</title>
+    <script>
+        const getStoredTheme = () => localStorage.getItem('theme') || 'light';
+        const setTheme = theme => document.documentElement.setAttribute('data-bs-theme', theme);
+        setTheme(getStoredTheme());
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-x: hidden; /* Запобігання горизонтальній прокрутці */
+        }
+
+        /* Плавна анімацію для трикутників (ефект "дихання") */
+        @keyframes pulse {
+            0% { opacity: 0.00; transform: scale(1); }
+            50% { opacity: 0.08; transform: scale(1.12); }
+            100% { opacity: 0.00; transform: scale(1); }
+        }
+        .dynamic-triangles {
+            animation: pulse 8s infinite alternate ease-in-out;
+            transform-origin: center;
+        }
+        /* Адаптивні кольори для бокової панелі та шапки */
+        [data-bs-theme="light"] {
+            --custom-sidebar-bg: #dadddf;
+            --custom-text-color: #1c2833;
+            --triangle-stroke: #ffffff;
+            --shape-rect: #1c2833; /* Темний квадрат вдень */
+        }
+        [data-bs-theme="dark"] {
+            --custom-sidebar-bg: #212529; /* Темно-сірий для панелі */
+            --custom-text-color: #f8f9fa; /* Світлий текст */
+            --triangle-stroke: #212529; /* Темні лінії між трикутниками */
+            --shape-rect: #6c757d; /* Світло-сірий квадрат вночі */
+        }
+    </style>
+</head>
+<body style="position: relative; z-index: 1;">
+    <button id="themeToggleBtn" class="btn btn-outline-secondary position-fixed bottom-0 end-0 m-4 rounded-circle shadow" style="z-index: 1050; width: 50px; height: 50px;">
+        <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+    </button>
+
+    <svg id="gridSvg" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; pointer-events: none;" xmlns="http://www.w3.org/2000/svg"></svg>
+
+    <svg viewBox="0 0 1920 1080" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none;" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="100" cy="1000" r="450" fill="#2e69ff" opacity="0.15" />
+        <polygon points="1400,0 1920,0 1920,500" fill="#00a8ff" opacity="0.2" />
+        <rect x="1100" y="300" width="400" height="400" fill="var(--shape-rect)" opacity="0.08" transform="rotate(25 1300 500)" />
+        <circle cx="1650" cy="850" r="50" fill="#2e69ff" opacity="0.25" />
+    </svg>
+
+    <div style="z-index: 10; position: relative;">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const svg = document.getElementById("gridSvg");
+            const colors = ["#2e69ff", "#00a8ff", "#e6efff", "#cce0ff", "#99c2ff"];
+
+            const dx = 150;
+            const dy = 100;
+
+            function generateGrid() {
+                // Очищаємо SVG перед перемалюванням
+                svg.innerHTML = '';
+
+                const cols = Math.ceil(window.innerWidth / dx) + 1;
+                const rows = Math.ceil(window.innerHeight / dy) + 1;
+
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                // Застосовуємо анімацію "дихання" (8 секунд)
+                g.classList.add("dynamic-triangles");
+
+                for (let i = 0; i < rows; i++) {
+                    for (let j = 0; j < cols; j++) {
+
+                        // Експеримент: З імовірністю 50% ми пропускаємо цей трикутник.
+                        // Таким чином на екрані малюється лише 50% фігур у випадкових місцях.
+                        if (Math.random() > 0.5) continue;
+
+                        const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                        let p0x, p0y, p1x, p1y, p2x, p2y;
+
+                        if ((i + j) % 2 === 0) {
+                            p0x = j * dx;          p0y = i * dy;
+                            p1x = (j + 1) * dx;    p1y = (i + 1) * dy;
+                            p2x = (j + 1) * dx;    p2y = (i - 1) * dy;
+                        } else {
+                            p0x = (j + 1) * dx;    p0y = i * dy;
+                            p1x = j * dx;          p1y = (i - 1) * dy;
+                            p2x = j * dx;          p2y = (i + 1) * dy;
+                        }
+
+                        polygon.setAttribute("points", `${p0x},${p0y} ${p1x},${p1y} ${p2x},${p2y}`);
+
+                        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                        polygon.setAttribute("fill", randomColor);
+                        polygon.setAttribute("stroke", "var(--triangle-stroke)");
+                        polygon.setAttribute("stroke-width", "0.5");
+
+                        g.appendChild(polygon);
+                    }
+                }
+                svg.appendChild(g);
+            }
+
+            // Генеруємо сітку при першому завантаженні
+            generateGrid();
+
+            // Перемальовуємо при зміні розміру вікна
+            window.addEventListener('resize', () => {
+                clearTimeout(window.resizeTimer);
+                window.resizeTimer = setTimeout(generateGrid, 200);
+            });
+
+            // Експеримент: Перегенеруємо сітку кожні 8 секунд (8000 мс)
+            // Цей час ідеально збігається з "провалом" прозорості в нашій CSS-анімації
+            setInterval(generateGrid, 8000);
+        });
+    </script>
+    <script>
+        document.getElementById('themeToggleBtn').addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            document.documentElement.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+
+            // Змінюємо іконку на кнопці
+            const icon = document.getElementById('themeIcon');
+            if (newTheme === 'dark') {
+                icon.className = 'bi bi-sun-fill';
+            } else {
+                icon.className = 'bi bi-moon-stars-fill';
+            }
+        });
+
+        // Встановлюємо правильну іконку при завантаженні
+        if (getStoredTheme() === 'dark') {
+            document.getElementById('themeIcon').className = 'bi bi-sun-fill';
+        }
+    </script>
+</body>
+</html>
