@@ -1,17 +1,85 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    .switch-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .switch-label {
+        font-size: 1rem;
+        font-weight: 500;
+        min-width: 35px;
+        text-align: right;
+        transition: color 0.2s;
+    }
+
+    .theme-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 26px;
+    }
+
+    .theme-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #444;
+        border: 2px solid #666;
+        transition: .3s ease-in-out;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 3px;
+        bottom: 3px;
+        background-color: #ccc;
+        transition: .3s ease-in-out;
+        border-radius: 50%;
+    }
+
+    /* Активований стан повзунка (ON) */
+    input:checked+.slider {
+        background-color: #2e69ff;
+        border-color: #2e69ff;
+    }
+
+    input:checked+.slider:before {
+        transform: translateX(24px);
+        background-color: #fff;
+    }
+</style>
+
 <div class="d-flex" style="min-height: 100vh; background-color: transparent;">
 
-    <div class="d-flex flex-column p-4 shadow-sm" style="width: 250px; background-color: var(--custom-sidebar-bg); z-index: 10;">
+    <div class="d-flex flex-column p-4 shadow-sm"
+        style="width: 250px; background-color: var(--custom-sidebar-bg); z-index: 10;">
         <h2 class="mt-4 mb-4 text-body-emphasis" style="font-weight: bold;">Панель ДІМ</h2>
         <div class="nav flex-column nav-pills mb-auto">
-            <a href="/user" class="btn mb-2 fw-bold text-start btn-primary shadow-sm" style="background-color: #2e69ff; border: none;">
+            <a href="/user" class="btn mb-2 fw-bold text-start btn-primary shadow-sm"
+                style="background-color: #2e69ff; border: none;">
                 <i class="bi bi-house-door-fill me-2"></i> Мешканець
             </a>
         </div>
         <div class="mt-auto">
-            <a href="/login" class="btn btn-danger w-100 fw-bold shadow-sm" style="background-color: #b90e0a; border: none;">
+            <a href="/logout" class="btn btn-danger w-100 fw-bold shadow-sm"
+                style="background-color: #b90e0a; border: none;">
                 <i class="bi bi-box-arrow-right me-2"></i> Вихід
             </a>
         </div>
@@ -19,8 +87,10 @@
 
     <div class="flex-grow-1 d-flex flex-column">
 
-        <div class="d-flex justify-content-between align-items-center py-4 px-5 shadow-sm" style="background-color: var(--custom-sidebar-bg); z-index: 5;">
-            <h3 class="fw-bold m-0 text-body-emphasis"><i class="bi bi-person-workspace me-2"></i>Розумний будинок: Керування</h3>
+        <div class="d-flex justify-content-between align-items-center py-4 px-5 shadow-sm"
+            style="background-color: var(--custom-sidebar-bg); z-index: 5;">
+            <h3 class="fw-bold m-0 text-body-emphasis"><i class="bi bi-person-workspace me-2"></i>Розумний будинок:
+                Керування</h3>
             <div class="d-flex align-items-center">
                 <span class="me-3 fs-5 fw-bold text-body-emphasis">Мешканець</span>
                 <i class="bi bi-person-fill fs-3 text-primary"></i>
@@ -30,11 +100,13 @@
         <div class="p-5 flex-grow-1" style="overflow-y: auto;">
 
             {% if data.alarm != 'NONE' %}
-            <div class="alert alert-danger shadow-sm border-0 p-4 mb-4 d-flex align-items-center" style="border-radius: 15px;">
+            <div class="alert alert-danger shadow-sm border-0 p-4 mb-4 d-flex align-items-center"
+                style="border-radius: 15px;">
                 <i class="bi bi-exclamation-triangle-fill fs-1 me-4 animate-pulse"></i>
                 <div>
                     <h4 class="fw-bold m-0">УВАГА! СИСТЕМА ОХОРОНИ ЗАФІКСУВАЛА ТРИВОГУ!</h4>
-                    <p class="m-0 fs-5">Статус загрози: <strong class="text-uppercase">{{ data.alarm }}</strong>. Адміністратора та служби сповіщено.</p>
+                    <p class="m-0 fs-5">Статус загрози: <strong class="text-uppercase">{{ data.alarm }}</strong>.
+                        Адміністратора та служби сповіщено.</p>
                 </div>
             </div>
             {% endif %}
@@ -48,7 +120,8 @@
                                 <i class="bi bi-thermometer-sun fs-3 text-danger"></i>
                             </div>
                             <h2 class="fw-bold text-body-emphasis">{{ data.temperature }} °C</h2>
-                            <p class="text-muted m-0 mt-3 fs-5">Вологість повітря: <strong>{{ data.humidity }}%</strong></p>
+                            <p class="text-muted m-0 mt-3 fs-5">Вологість повітря: <strong>{{ data.humidity }}%</strong>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -60,10 +133,12 @@
                                 <h5 class="fw-bold text-muted m-0">Енергопостачання</h5>
                                 <i class="bi bi-battery-charging fs-3 text-success"></i>
                             </div>
-                            <h2 class="fw-bold {% if data.power == 'online' %}text-success{% else %}text-danger{% endif %}">
+                            <h2
+                                class="fw-bold {% if data.power == 'online' %}text-success{% else %}text-danger{% endif %}">
                                 {% if data.power == 'online' %}Мережа 220V{% else %}Живлення від ДБЖ{% endif %}
                             </h2>
-                            <p class="text-muted m-0 mt-3 fs-5">Заряд акумулятора: <strong>{{ data.battery }}%</strong></p>
+                            <p class="text-muted m-0 mt-3 fs-5">Заряд акумулятора: <strong>{{ data.battery }}%</strong>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -75,7 +150,8 @@
                                 <h5 class="fw-bold text-muted m-0">Статус охорони</h5>
                                 <i class="bi bi-shield-shaded fs-3 text-info"></i>
                             </div>
-                            <h2 class="fw-bold {% if data.security_mode == 'ARM' %}text-warning{% else %}text-secondary{% endif %}">
+                            <h2
+                                class="fw-bold {% if data.security_mode == 'ARM' %}text-warning{% else %}text-secondary{% endif %}">
                                 {% if data.security_mode == 'ARM' %}АКТИВНА{% else %}ВИМКНЕНА{% endif %}
                             </h2>
                             <p class="text-muted m-0 mt-3 fs-6">Зміна режиму доступна лише Адміністратору</p>
@@ -87,27 +163,43 @@
             <div class="row g-4 mb-4">
                 <div class="col-md-6">
                     <div class="card shadow-sm border-0 p-4 h-100" style="border-radius: 15px;">
-                        <h4 class="fw-bold mb-4 text-body-emphasis"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Керування освітленням кімнат</h4>
+                        <h4 class="fw-bold mb-4 text-body-emphasis"><i
+                                class="bi bi-lightbulb-fill me-2 text-warning"></i>Керування освітленням кімнат</h4>
                         <div class="d-flex flex-column gap-3 justify-content-center h-75">
-                            <div class="p-3 bg-body-tertiary rounded-3 d-flex justify-content-between align-items-center">
+
+                            <div
+                                class="p-3 bg-body-tertiary rounded-3 d-flex justify-content-between align-items-center">
                                 <div>
                                     <h5 class="fw-bold m-0">Світло: Кімната 1</h5>
                                     <small class="text-muted">Розширювач PCF8574 (Пін 4)</small>
                                 </div>
-                                <div class="d-flex gap-2">
-                                    <a href="/control/room1/on" class="btn btn-success fw-bold px-4">Увімкнути</a>
-                                    <a href="/control/room1/off" class="btn btn-danger fw-bold px-4">Вимкнути</a>
+                                <div class="switch-container">
+                                    <span class="switch-label text-muted" id="lbl-room1-u">{% if data.room1_status ==
+                                        'ON' %}On{% else %}Off{% endif %}</span>
+                                    <label class="theme-switch">
+                                        <input type="checkbox" id="switch-room1-u"
+                                            onchange="toggleDevice('room1', this.checked, 'lbl-room1-u')" {% if
+                                            data.room1_status=='ON' %}checked{% endif %}>
+                                        <span class="slider"></span>
+                                    </label>
                                 </div>
                             </div>
 
-                            <div class="p-3 bg-body-tertiary rounded-3 d-flex justify-content-between align-items-center">
+                            <div
+                                class="p-3 bg-body-tertiary rounded-3 d-flex justify-content-between align-items-center">
                                 <div>
                                     <h5 class="fw-bold m-0">Світло: Кімната 2</h5>
                                     <small class="text-muted">Розширювач PCF8574 (Пін 5)</small>
                                 </div>
-                                <div class="d-flex gap-2">
-                                    <a href="/control/room2/on" class="btn btn-success fw-bold px-4">Увімкнути</a>
-                                    <a href="/control/room2/off" class="btn btn-danger fw-bold px-4">Вимкнути</a>
+                                <div class="switch-container">
+                                    <span class="switch-label text-muted" id="lbl-room2-u">{% if data.room2_status ==
+                                        'ON' %}On{% else %}Off{% endif %}</span>
+                                    <label class="theme-switch">
+                                        <input type="checkbox" id="switch-room2-u"
+                                            onchange="toggleDevice('room2', this.checked, 'lbl-room2-u')" {% if
+                                            data.room2_status=='ON' %}checked{% endif %}>
+                                        <span class="slider"></span>
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -116,27 +208,37 @@
 
                 <div class="col-md-6">
                     <div class="card shadow-sm border-0 p-4 h-100" style="border-radius: 15px;">
-                        <h4 class="fw-bold mb-4 text-body-emphasis"><i class="bi bi-flower2 me-2 text-success"></i>Розумний сад та екологія</h4>
+                        <h4 class="fw-bold mb-4 text-body-emphasis"><i
+                                class="bi bi-flower2 me-2 text-success"></i>Розумний сад та екологія</h4>
                         <div class="d-flex flex-column gap-3 justify-content-center h-75">
-                            <div class="p-3 bg-body-tertiary rounded-3 d-flex justify-content-between align-items-center">
+                            <div
+                                class="p-3 bg-body-tertiary rounded-3 d-flex justify-content-between align-items-center">
                                 <div>
                                     <h5 class="fw-bold m-0">Вологість ґрунту</h5>
                                     <small class="text-muted">Поточний показник датчика</small>
                                 </div>
-                                <span class="fs-4 fw-bold {% if data.soil|int > 2500 %}text-danger{% else %}text-primary{% endif %}">
-                                    {{ data.soil }} 
+                                <span
+                                    class="fs-4 fw-bold {% if data.soil|int > 2500 %}text-danger{% else %}text-primary{% endif %}">
+                                    {{ data.soil }}
                                     {% if data.soil|int > 2500 %}(Сухо){% else %}(ОК){% endif %}
                                 </span>
                             </div>
 
-                            <div class="p-3 bg-body-tertiary rounded-3 d-flex justify-content-between align-items-center">
+                            <div
+                                class="p-3 bg-body-tertiary rounded-3 d-flex justify-content-between align-items-center">
                                 <div>
                                     <h5 class="fw-bold m-0">Полив рослин</h5>
                                     <small class="text-muted">Водяна помпа (Пін 2)</small>
                                 </div>
-                                <div class="d-flex gap-2">
-                                    <a href="/control/pump/on" class="btn btn-success fw-bold px-4">Почати полив</a>
-                                    <a href="/control/pump/off" class="btn btn-danger fw-bold px-4">Зупинити</a>
+                                <div class="switch-container">
+                                    <span class="switch-label text-muted" id="lbl-pump-u">{% if data.pump_status == 'ON'
+                                        %}On{% else %}Off{% endif %}</span>
+                                    <label class="theme-switch">
+                                        <input type="checkbox" id="switch-pump-u"
+                                            onchange="toggleDevice('pump', this.checked, 'lbl-pump-u')" {% if
+                                            data.pump_status=='ON' %}checked{% endif %}>
+                                        <span class="slider"></span>
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -147,4 +249,27 @@
         </div>
     </div>
 </div>
+
+<script>
+    function toggleDevice(device, isChecked, labelId) {
+        const action = isChecked ? 'on' : 'off';
+        const label = document.getElementById(labelId);
+
+        label.innerText = isChecked ? 'On' : 'Off';
+
+        fetch(`/control/${device}/${action}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    alert('Помилка виконання команди!');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+</script>
 {% endblock %}

@@ -3,15 +3,18 @@
 {% block content %}
 <div class="d-flex" style="min-height: 100vh; background-color: transparent;">
 
-    <div class="d-flex flex-column p-4 shadow-sm" style="width: 250px; background-color: var(--custom-sidebar-bg); z-index: 10;">
+    <div class="d-flex flex-column p-4 shadow-sm"
+        style="width: 250px; background-color: var(--custom-sidebar-bg); z-index: 10;">
         <h2 class="mt-4 mb-4 text-body-emphasis" style="font-weight: bold;">Панель ДІМ</h2>
         <div class="nav flex-column nav-pills mb-auto">
-            <a href="/guest" class="btn mb-2 fw-bold text-start btn-primary shadow-sm" style="background-color: #2e69ff; border: none;">
+            <a href="/guest" class="btn mb-2 fw-bold text-start btn-primary shadow-sm"
+                style="background-color: #2e69ff; border: none;">
                 <i class="bi bi-eye-fill me-2"></i> Гість / Монітор
             </a>
         </div>
         <div class="mt-auto">
-            <a href="/login" class="btn btn-danger w-100 fw-bold shadow-sm" style="background-color: #b90e0a; border: none;">
+            <a href="/login" class="btn btn-danger w-100 fw-bold shadow-sm"
+                style="background-color: #b90e0a; border: none;">
                 <i class="bi bi-box-arrow-right me-2"></i> Вихід
             </a>
         </div>
@@ -19,8 +22,10 @@
 
     <div class="flex-grow-1 d-flex flex-column">
 
-        <div class="d-flex justify-content-between align-items-center py-4 px-5 shadow-sm" style="background-color: var(--custom-sidebar-bg); z-index: 5;">
-            <h3 class="fw-bold m-0 text-body-emphasis"><i class="bi bi-display me-2"></i>Розумний будинок: Інформаційне табло</h3>
+        <div class="d-flex justify-content-between align-items-center py-4 px-5 shadow-sm"
+            style="background-color: var(--custom-sidebar-bg); z-index: 5;">
+            <h3 class="fw-bold m-0 text-body-emphasis"><i class="bi bi-display me-2"></i>Розумний будинок: Інформаційне
+                табло</h3>
             <div class="d-flex align-items-center">
                 <span class="me-3 fs-5 fw-bold text-body-emphasis">Гість</span>
                 <i class="bi bi-person-bounding-box fs-3 text-primary"></i>
@@ -30,11 +35,13 @@
         <div class="p-5 flex-grow-1" style="overflow-y: auto;">
 
             {% if data.alarm != 'NONE' %}
-            <div class="alert alert-warning shadow-sm border-0 p-4 mb-4 d-flex align-items-center" style="border-radius: 15px;">
+            <div class="alert alert-warning shadow-sm border-0 p-4 mb-4 d-flex align-items-center"
+                style="border-radius: 15px;">
                 <i class="bi bi-exclamation-triangle-fill fs-1 me-4 animate-pulse text-danger"></i>
                 <div>
                     <h4 class="fw-bold m-0 text-danger">УВАГА! СПРАЦЮВАЛА СИСТЕМА БЕЗПЕКИ!</h4>
-                    <p class="m-0 fs-5 text-body-emphasis">Адміністратори будинку вже займаються вирішенням ситуації.</p>
+                    <p class="m-0 fs-5 text-body-emphasis">Адміністратори будинку вже займаються вирішенням ситуації.
+                    </p>
                 </div>
             </div>
             {% endif %}
@@ -42,8 +49,9 @@
             <div class="row g-4 mb-4">
                 <div class="col-md-6">
                     <div class="card shadow-sm border-0 p-4" style="border-radius: 15px;">
-                        <h4 class="fw-bold mb-4 text-body-emphasis"><i class="bi bi-thermometer-half me-2 text-danger"></i>Мікроклімат у приміщеннях</h4>
-                        
+                        <h4 class="fw-bold mb-4 text-body-emphasis"><i
+                                class="bi bi-thermometer-half me-2 text-danger"></i>Мікроклімат у приміщеннях</h4>
+
                         <div class="d-flex justify-content-around align-items-center py-3">
                             <div class="text-center">
                                 <i class="bi bi-thermometer-sun text-danger" style="font-size: 3rem;"></i>
@@ -62,14 +70,17 @@
 
                 <div class="col-md-6">
                     <div class="card shadow-sm border-0 p-4" style="border-radius: 15px;">
-                        <h4 class="fw-bold mb-4 text-body-emphasis"><i class="bi bi-lightning-charge me-2 text-warning"></i>Енергопостачання та Батарея</h4>
-                        
-                        <div class="p-3 bg-body-tertiary rounded-3 mb-3 d-flex justify-content-between align-items-center">
+                        <h4 class="fw-bold mb-4 text-body-emphasis"><i
+                                class="bi bi-lightning-charge me-2 text-warning"></i>Енергопостачання та Батарея</h4>
+
+                        <div
+                            class="p-3 bg-body-tertiary rounded-3 mb-3 d-flex justify-content-between align-items-center">
                             <div>
                                 <h5 class="fw-bold m-0">Статус зовнішньої мережі</h5>
                                 <small class="text-muted">Детекція основного входу 220V</small>
                             </div>
-                            <span class="badge fs-6 px-3 py-2 {% if data.power == 'online' %}bg-success{% else %}bg-danger{% endif %}">
+                            <span
+                                class="badge fs-6 px-3 py-2 {% if data.power == 'online' %}bg-success{% else %}bg-danger{% endif %}">
                                 {% if data.power == 'online' %}АКТИВНА{% else %}БЛЕКАУТ{% endif %}
                             </span>
                         </div>
@@ -88,14 +99,17 @@
             <div class="row g-4">
                 <div class="col-md-12">
                     <div class="card shadow-sm border-0 p-4" style="border-radius: 15px;">
-                        <h4 class="fw-bold mb-4 text-body-emphasis"><i class="bi bi-shield-check me-2 text-success"></i>Стан підсистем безпеки (Тільки перегляд)</h4>
-                        
+                        <h4 class="fw-bold mb-4 text-body-emphasis"><i
+                                class="bi bi-shield-check me-2 text-success"></i>Стан підсистем безпеки (Тільки
+                            перегляд)</h4>
+
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <div class="p-3 border rounded-3 text-center bg-body-tertiary">
                                     <i class="bi bi-door-closed fs-2 text-secondary mb-2"></i>
                                     <h6 class="text-muted">Стан вхідних дверей</h6>
-                                    <h5 class="fw-bold m-0 {% if data.door == 'OPEN' %}text-danger{% else %}text-success{% endif %}">
+                                    <h5
+                                        class="fw-bold m-0 {% if data.door == 'OPEN' %}text-danger{% else %}text-success{% endif %}">
                                         {% if data.door == 'OPEN' %}ВІДЧИНЕНІ{% else %}ЗАЧИНЕНІ{% endif %}
                                     </h5>
                                 </div>
@@ -105,7 +119,8 @@
                                 <div class="p-3 border rounded-3 text-center bg-body-tertiary">
                                     <i class="bi bi-person-walking fs-2 text-secondary mb-2"></i>
                                     <h6 class="text-muted">Сенсор руху в холі</h6>
-                                    <h5 class="fw-bold m-0 {% if data.motion == 'ON' %}text-warning{% else %}text-success{% endif %}">
+                                    <h5
+                                        class="fw-bold m-0 {% if data.motion == 'ON' %}text-warning{% else %}text-success{% endif %}">
                                         {% if data.motion == 'ON' %}Є РУХ{% else %}ТИША{% endif %}
                                     </h5>
                                 </div>
@@ -115,16 +130,21 @@
                                 <div class="p-3 border rounded-3 text-center bg-body-tertiary">
                                     <i class="bi bi-lock fs-2 text-secondary mb-2"></i>
                                     <h6 class="text-muted">Загальний режим периметру</h6>
-                                    <h5 class="fw-bold m-0 {% if data.security_mode == 'ARM' %}text-warning{% else %}text-secondary{% endif %}">
-                                        {% if data.security_mode == 'ARM' %}РЕЖИМ ОХОРОНИ{% else %}БЕЗ ОХОРОНИ{% endif %}
+                                    <h5
+                                        class="fw-bold m-0 {% if data.security_mode == 'ARM' %}text-warning{% else %}text-secondary{% endif %}">
+                                        {% if data.security_mode == 'ARM' %}РЕЖИМ ОХОРОНИ{% else %}БЕЗ ОХОРОНИ{% endif
+                                        %}
                                     </h5>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="alert alert-info border-0 shadow-sm mt-4 p-3 d-flex align-items-center mb-0" style="border-radius: 10px;">
+                        <div class="alert alert-info border-0 shadow-sm mt-4 p-3 d-flex align-items-center mb-0"
+                            style="border-radius: 10px;">
                             <i class="bi bi-info-circle-fill fs-4 me-3 text-primary"></i>
-                            <span class="small fw-semibold text-secondary-emphasis">Ви увійшли як гість. Інтерактивне керування обладнанням, силовими реле та налаштуваннями конфігурації у цьому режимі недоступне.</span>
+                            <span class="small fw-semibold text-secondary-emphasis">Ви увійшли як гість. Інтерактивне
+                                керування обладнанням, силовими реле та налаштуваннями конфігурації у цьому режимі
+                                недоступне.</span>
                         </div>
                     </div>
                 </div>

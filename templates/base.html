@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="uk">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,45 +15,142 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            overflow-x: hidden; /* Запобігання горизонтальній прокрутці */
+            overflow-x: hidden;
+            /* Запобігання горизонтальній прокрутці */
         }
+
 
         /* Плавна анімацію для трикутників (ефект "дихання") */
         @keyframes pulse {
-            0% { opacity: 0.00; transform: scale(1); }
-            50% { opacity: 0.08; transform: scale(1.12); }
-            100% { opacity: 0.00; transform: scale(1); }
+            0% {
+                opacity: 0.00;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.08;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0.00;
+                transform: scale(1);
+            }
         }
+
         .dynamic-triangles {
             animation: pulse 8s infinite alternate ease-in-out;
             transform-origin: center;
         }
+
         /* Адаптивні кольори для бокової панелі та шапки */
         [data-bs-theme="light"] {
             --custom-sidebar-bg: #dadddf;
             --custom-text-color: #1c2833;
             --triangle-stroke: #ffffff;
-            --shape-rect: #1c2833; /* Темний квадрат вдень */
+            --shape-rect: #1c2833;
+            /* Темний квадрат вдень */
         }
+
         [data-bs-theme="dark"] {
-            --custom-sidebar-bg: #212529; /* Темно-сірий для панелі */
-            --custom-text-color: #f8f9fa; /* Світлий текст */
-            --triangle-stroke: #212529; /* Темні лінії між трикутниками */
-            --shape-rect: #6c757d; /* Світло-сірий квадрат вночі */
+            --custom-sidebar-bg: #212529;
+            /* Темно-сірий для панелі */
+            --custom-text-color: #f8f9fa;
+            /* Світлий текст */
+            --triangle-stroke: #212529;
+            /* Темні лінії між трикутниками */
+            --shape-rect: #6c757d;
+            /* Світло-сірий квадрат вночі */
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /*TOGGLE SWITCH*/
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .switch-label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            min-width: 35px;
+            text-align: right;
+        }
+
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #444;
+            border: 2px solid #666;
+            transition: .3s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #ccc;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        /* Стан коли увімкнено (ON) */
+        input:checked+.slider {
+            background-color: #2e69ff;
+            border-color: #2e69ff;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(24px);
+            background-color: #fff;
         }
     </style>
 </head>
+
 <body style="position: relative; z-index: 1;">
-    <button id="themeToggleBtn" class="btn btn-outline-secondary position-fixed bottom-0 end-0 m-4 rounded-circle shadow" style="z-index: 1050; width: 50px; height: 50px;">
+    <button id="themeToggleBtn"
+        class="btn btn-outline-secondary position-fixed bottom-0 end-0 m-4 rounded-circle shadow"
+        style="z-index: 1050; width: 50px; height: 50px;">
         <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
     </button>
 
-    <svg id="gridSvg" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; pointer-events: none;" xmlns="http://www.w3.org/2000/svg"></svg>
+    <svg id="gridSvg"
+        style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; pointer-events: none;"
+        xmlns="http://www.w3.org/2000/svg"></svg>
 
-    <svg viewBox="0 0 1920 1080" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none;" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 1920 1080"
+        style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none;"
+        preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
         <circle cx="100" cy="1000" r="450" fill="#2e69ff" opacity="0.15" />
         <polygon points="1400,0 1920,0 1920,500" fill="#00a8ff" opacity="0.2" />
-        <rect x="1100" y="300" width="400" height="400" fill="var(--shape-rect)" opacity="0.08" transform="rotate(25 1300 500)" />
+        <rect x="1100" y="300" width="400" height="400" fill="var(--shape-rect)" opacity="0.08"
+            transform="rotate(25 1300 500)" />
         <circle cx="1650" cy="850" r="50" fill="#2e69ff" opacity="0.25" />
     </svg>
 
@@ -93,13 +191,13 @@
                         let p0x, p0y, p1x, p1y, p2x, p2y;
 
                         if ((i + j) % 2 === 0) {
-                            p0x = j * dx;          p0y = i * dy;
-                            p1x = (j + 1) * dx;    p1y = (i + 1) * dy;
-                            p2x = (j + 1) * dx;    p2y = (i - 1) * dy;
+                            p0x = j * dx; p0y = i * dy;
+                            p1x = (j + 1) * dx; p1y = (i + 1) * dy;
+                            p2x = (j + 1) * dx; p2y = (i - 1) * dy;
                         } else {
-                            p0x = (j + 1) * dx;    p0y = i * dy;
-                            p1x = j * dx;          p1y = (i - 1) * dy;
-                            p2x = j * dx;          p2y = (i + 1) * dy;
+                            p0x = (j + 1) * dx; p0y = i * dy;
+                            p1x = j * dx; p1y = (i - 1) * dy;
+                            p2x = j * dx; p2y = (i + 1) * dy;
                         }
 
                         polygon.setAttribute("points", `${p0x},${p0y} ${p1x},${p1y} ${p2x},${p2y}`);
@@ -152,4 +250,5 @@
         }
     </script>
 </body>
+
 </html>
