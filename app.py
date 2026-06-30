@@ -82,7 +82,7 @@ def on_message(client, userdata, msg):
         socketio.emit('sensor_update', {'sensor': sensor_key, 'value': payload})
 
 
-mqtt_client = mqtt.Client()
+mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
 try:
