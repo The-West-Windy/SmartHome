@@ -23,11 +23,11 @@ smart_home_data = {
     "pump_status": "OFF"    #збереження стану для помпи
 }
 
-MQTT_BROKER = "127.0.0.1"
+MQTT_BROKER = "test.mosquitto.org"
 MQTT_PORT = 1883
 
 
-def on_connect(client, userdata, flags, rc):
+def on_connect(client, userdata, flags, reason_code, properties):
     client.subscribe("home/#")
 
 
@@ -57,7 +57,7 @@ def on_message(client, userdata, msg):
         socketio.emit('sensor_update', {'sensor': sensor_key, 'value': payload})
 
 
-mqtt_client = mqtt.Client()
+mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
 try:
