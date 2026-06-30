@@ -119,7 +119,7 @@
                                 <h5 class="fw-bold text-muted m-0">Режим охорони</h5>
                                 <i class="bi bi-shield-lock-fill fs-3 text-primary"></i>
                             </div>
-                            <h2 id="security-status"
+                            <h2 id="security-status" data-view="admin"
                                 class="fw-bold {% if data.security_mode == 'ARM' %}text-warning{% else %}text-success{% endif %}">
                                 {% if data.security_mode == 'ARM' %}ПІД ОХОРОНОЮ{% else %}ЗНЯТО З ОХОРОНИ{% endif %}
                             </h2>
@@ -140,11 +140,11 @@
                                 <h5 class="fw-bold text-muted m-0">Основне живлення</h5>
                                 <i class="bi bi-lightning-charge-fill fs-3 text-warning"></i>
                             </div>
-                            <h2
+                            <h2 id="val-power-text" data-view="admin"
                                 class="fw-bold {% if data.power == 'online' %}text-success{% else %}text-danger{% endif %}">
                                 {% if data.power == 'online' %}МЕРЕЖА 220V{% else %}БЛЕКАУТ{% endif %}
                             </h2>
-                            <p class="text-muted m-0 mt-3 fs-5">Резервна батарея: <strong>{{ data.battery }}%</strong>
+                            <p class="text-muted m-0 mt-3 fs-5">Резервна батарея: <strong id="val-battery">{{ data.battery }}</strong>%
                             </p>
                         </div>
                     </div>
@@ -157,11 +157,11 @@
                                 <h5 class="fw-bold text-muted m-0">Повітря та безпека</h5>
                                 <i class="bi bi-cloud-haze2-fill fs-3 text-info"></i>
                             </div>
-                            <h2
+                            <h2 id="val-gas"
                                 class="fw-bold {% if data.gas|int > 2200 %}text-danger{% else %}text-success{% endif %}">
                                 {{ data.gas }} PPM
                             </h2>
-                            <p class="text-muted m-0 mt-3 fs-6">
+                            <p id="val-gas-text" class="text-muted m-0 mt-3 fs-6">
                                 {% if data.gas|int > 2200 %}Перевищення норми диму!{% else %}Рівень газу в нормі{% endif
                                 %}
                             </p>
@@ -187,21 +187,21 @@
                                 <tbody>
                                     <tr>
                                         <td class="fw-bold">Температура (DHT11)</td>
-                                        <td class="text-center fw-bold fs-5">{{ data.temperature }} °C</td>
+                                        <td class="text-center fw-bold fs-5"><span id="val-temperature">{{ data.temperature }}</span> °C</td>
                                         <td class="text-center"><span class="badge bg-success">Норма</span></td>
                                     </tr>
                                     <tr>
                                         <td class="fw-bold">Вологість повітря</td>
-                                        <td class="text-center fw-bold fs-5">{{ data.humidity }} %</td>
+                                        <td class="text-center fw-bold fs-5"><span id="val-humidity">{{ data.humidity }}</span> %</td>
                                         <td class="text-center"><span class="badge bg-success">Норма</span></td>
                                     </tr>
                                     <tr>
                                         <td class="fw-bold">Вхідні двері (Геркон)</td>
-                                        <td class="text-center fw-bold">
+                                        <td class="text-center fw-bold val-door-text {% if data.door == 'OPEN' %}text-danger{% else %}text-success{% endif %}">
                                             {% if data.door == 'OPEN' %}ВІДЧИНЕНІ{% else %}ЗАЧИНЕНІ{% endif %}
                                         </td>
                                         <td class="text-center">
-                                            <span
+                                            <span id="badge-door"
                                                 class="badge {% if data.door == 'OPEN' %}bg-danger{% else %}bg-secondary{% endif %}">
                                                 {{ data.door }}
                                             </span>
@@ -209,11 +209,11 @@
                                     </tr>
                                     <tr>
                                         <td class="fw-bold">Датчик руху (PIR)</td>
-                                        <td class="text-center fw-bold">
+                                        <td class="text-center fw-bold val-motion-text {% if data.motion == 'ON' %}text-warning{% else %}text-success{% endif %}">
                                             {% if data.motion == 'ON' %}Є РУХ{% else %}ТИША{% endif %}
                                         </td>
                                         <td class="text-center">
-                                            <span
+                                            <span id="badge-motion"
                                                 class="badge {% if data.motion == 'ON' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
                                                 {{ data.motion }}
                                             </span>
@@ -221,9 +221,9 @@
                                     </tr>
                                     <tr>
                                         <td class="fw-bold">Вологість ґрунту</td>
-                                        <td class="text-center fw-bold fs-5">{{ data.soil }}</td>
+                                        <td class="text-center fw-bold fs-5" id="val-soil">{{ data.soil }}</td>
                                         <td class="text-center">
-                                            <span
+                                            <span id="badge-soil"
                                                 class="badge {% if data.soil|int > 2500 %}bg-danger{% else %}bg-info{% endif %}">
                                                 {% if data.soil|int > 2500 %}Сухо{% else %}Зволожено{% endif %}
                                             </span>

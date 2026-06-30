@@ -119,8 +119,8 @@
                                 <h5 class="fw-bold text-muted m-0">Клімат у домі</h5>
                                 <i class="bi bi-thermometer-sun fs-3 text-danger"></i>
                             </div>
-                            <h2 class="fw-bold text-body-emphasis">{{ data.temperature }} °C</h2>
-                            <p class="text-muted m-0 mt-3 fs-5">Вологість повітря: <strong>{{ data.humidity }}%</strong>
+                            <h2 class="fw-bold text-body-emphasis"><span id="val-temperature">{{ data.temperature }}</span> °C</h2>
+                            <p class="text-muted m-0 mt-3 fs-5">Вологість повітря: <strong><span id="val-humidity">{{ data.humidity }}</span>%</strong>
                             </p>
                         </div>
                     </div>
@@ -133,11 +133,11 @@
                                 <h5 class="fw-bold text-muted m-0">Енергопостачання</h5>
                                 <i class="bi bi-battery-charging fs-3 text-success"></i>
                             </div>
-                            <h2
+                            <h2 id="val-power-text" data-view="user"
                                 class="fw-bold {% if data.power == 'online' %}text-success{% else %}text-danger{% endif %}">
                                 {% if data.power == 'online' %}Мережа 220V{% else %}Живлення від ДБЖ{% endif %}
                             </h2>
-                            <p class="text-muted m-0 mt-3 fs-5">Заряд акумулятора: <strong>{{ data.battery }}%</strong>
+                            <p class="text-muted m-0 mt-3 fs-5">Заряд акумулятора: <strong><span id="val-battery">{{ data.battery }}</span>%</strong>
                             </p>
                         </div>
                     </div>
@@ -150,7 +150,7 @@
                                 <h5 class="fw-bold text-muted m-0">Статус охорони</h5>
                                 <i class="bi bi-shield-shaded fs-3 text-info"></i>
                             </div>
-                            <h2
+                            <h2 id="security-status" data-view="user"
                                 class="fw-bold {% if data.security_mode == 'ARM' %}text-warning{% else %}text-secondary{% endif %}">
                                 {% if data.security_mode == 'ARM' %}АКТИВНА{% else %}ВИМКНЕНА{% endif %}
                             </h2>
@@ -217,9 +217,12 @@
                                     <h5 class="fw-bold m-0">Вологість ґрунту</h5>
                                     <small class="text-muted">Поточний показник датчика</small>
                                 </div>
-                                <span
+                                <span id="val-soil"
                                     class="fs-4 fw-bold {% if data.soil|int > 2500 %}text-danger{% else %}text-primary{% endif %}">
                                     {{ data.soil }}
+                                </span>
+                                <span id="val-soil-text"
+                                    class="fs-4 fw-bold {% if data.soil|int > 2500 %}text-danger{% else %}text-primary{% endif %}">
                                     {% if data.soil|int > 2500 %}(Сухо){% else %}(ОК){% endif %}
                                 </span>
                             </div>

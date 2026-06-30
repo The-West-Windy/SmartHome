@@ -1,9 +1,11 @@
 from flask import Flask, render_template, request, redirect, session #додав session
 import paho.mqtt.client as mqtt
+from flask_socketio import SocketIO
 
 app = Flask(__name__)
 
 app.secret_key = 'secret_key_123' #добавлений код
+socketio = SocketIO(app, async_mode='threading')
 
 smart_home_data = {
     "temperature": "0.0",
@@ -33,33 +35,26 @@ def on_message(client, userdata, msg):
     topic = msg.topic
     payload = msg.payload.decode('utf-8')
 
-    if topic == "home/climate/temperature":
-        smart_home_data["temperature"] = payload
-    elif topic == "home/climate/humidity":
-        smart_home_data["humidity"] = payload
-    elif topic == "home/safety/gas":
-        smart_home_data["gas"] = payload
-    elif topic == "home/garden/soil":
-        smart_home_data["soil"] = payload
-    elif topic == "home/power/battery":
-        smart_home_data["battery"] = payload
-    elif topic == "home/power/status":
-        smart_home_data["power"] = payload
-    elif topic == "home/security/motion":
-        smart_home_data["motion"] = payload
-    elif topic == "home/security/door":
-        smart_home_data["door"] = payload
-    elif topic == "home/security/mode":
-        smart_home_data["security_mode"] = payload
-    elif topic == "home/security/alarm":
-        smart_home_data["alarm"] = payload
-    # Оновлення стану від заліза, якщо воно публікує статус назад у брокер
-    elif topic == "home/light/room1":
-        smart_home_data["room1_status"] = payload
-    elif topic == "home/light/room2":
-        smart_home_data["room2_status"] = payload
-    elif topic == "home/garden/pump":
-        smart_home_data["pump_status"] = payload
+    topic_map = {
+        "home/climate/temperature": "temperature",
+        "home/climate/humidity": "humidity",
+        "home/safety/gas": "gas",
+        "home/garden/soil": "soil",
+        "home/power/battery": "battery",
+        "home/power/status": "power",
+        "home/security/motion": "motion",
+        "home/security/door": "door",
+        "home/security/mode": "security_mode",
+        "home/security/alarm": "alarm",
+        "home/light/room1": "room1_status",
+        "home/light/room2": "room2_status",
+        "home/garden/pump": "pump_status"
+    }
+
+    if topic in topic_map:
+        sensor_key = topic_map[topic]
+        smart_home_data[sensor_key] = payload
+        socketio.emit('sensor_update', {'sensor': sensor_key, 'value': payload})
 
 
 mqtt_client = mqtt.Client()
@@ -163,4 +158,4 @@ def control_device(device, action):
     return redirect(request.referrer or '/admin')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    socketio.run(app, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
