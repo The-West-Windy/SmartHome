@@ -300,6 +300,24 @@
                 </div>
             </div>
 
+            <div class="row g-4 mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm border-0 p-4" style="border-radius: 15px;">
+                        <h4 class="fw-bold mb-4 text-body-emphasis"><i class="bi bi-graph-up me-2 text-primary"></i>Аналітика за 24 години</h4>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold text-muted text-center">Історія Температури (°C)</h6>
+                                <canvas id="temperatureChart"></canvas>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold text-muted text-center">Історія Вологості (%)</h6>
+                                <canvas id="humidityChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -342,5 +360,52 @@
             })
             .catch(error => console.error('Error:', error));
     }
+
+    // Chart.js логіка
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctxTemp = document.getElementById('temperatureChart');
+        const ctxHum = document.getElementById('humidityChart');
+        if (!ctxTemp || !ctxHum) return;
+
+        const createChart = (ctx, label, color) => {
+            return new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: label, data: [], borderColor: color, tension: 0.4, fill: true, backgroundColor: color + '33' }] },
+                options: { responsive: true, animation: { duration: 500 }, scales: { x: { ticks: { maxTicksLimit: 10 } } } }
+            });
+        };
+
+        const tempChart = createChart(ctxTemp, 'Температура (°C)', '#dc3545');
+        const humChart = createChart(ctxHum, 'Вологість (%)', '#0d6efd');
+
+        const loadData = (sensor, chart) => {
+            fetch(`/api/history/${sensor}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) return;
+                    chart.data.labels = data.map(d => d.time);
+                    chart.data.datasets[0].data = data.map(d => d.value);
+                    chart.update();
+                });
+        };
+
+        loadData('temperature', tempChart);
+        loadData('humidity', humChart);
+
+        document.addEventListener('sensor_data_received', function(e) {
+            const msg = e.detail;
+            const now = new Date().toLocaleTimeString('uk-UA', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            
+            const updateChart = (chart, value) => {
+                chart.data.labels.push(now);
+                chart.data.datasets[0].data.push(parseFloat(value));
+                if (chart.data.labels.length > 20) { chart.data.labels.shift(); chart.data.datasets[0].data.shift(); }
+                chart.update();
+            };
+
+            if (msg.sensor === 'temperature') updateChart(tempChart, msg.value);
+            if (msg.sensor === 'humidity') updateChart(humChart, msg.value);
+        });
+    });
 </script>
 {% endblock %}

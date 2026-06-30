@@ -1,11 +1,31 @@
-from flask import Flask, render_template, request, redirect, session #додав session
+from flask import Flask, render_template, request, redirect, session, jsonify #додав session та jsonify
 import paho.mqtt.client as mqtt
 from flask_socketio import SocketIO
+import sqlite3
 
 app = Flask(__name__)
 
 app.secret_key = 'secret_key_123' #добавлений код
 socketio = SocketIO(app, async_mode='threading')
+
+def init_db():
+    with sqlite3.connect('smarthome.db') as conn:
+        c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS sensor_data
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      sensor TEXT,
+                      value TEXT,
+                      timestamp DATETIME DEFAULT (datetime('now', 'localtime')))''')
+        conn.commit()
+
+def save_to_db(sensor, value):
+    try:
+        with sqlite3.connect('smarthome.db') as conn:
+            c = conn.cursor()
+            c.execute("INSERT INTO sensor_data (sensor, value) VALUES (?, ?)", (sensor, value))
+            conn.commit()
+    except Exception as e:
+        print(f"DB Error: {e}")
 
 smart_home_data = {
     "temperature": "0.0",
@@ -54,13 +74,19 @@ def on_message(client, userdata, msg):
     if topic in topic_map:
         sensor_key = topic_map[topic]
         smart_home_data[sensor_key] = payload
+        
+        # Зберігаємо історію тільки для числових датчиків
+        if sensor_key in ['temperature', 'humidity', 'gas', 'soil']:
+            save_to_db(sensor_key, payload)
+            
         socketio.emit('sensor_update', {'sensor': sensor_key, 'value': payload})
 
 
-mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+mqtt_client = mqtt.Client()
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
 try:
+    init_db() # Ініціалізація бази даних
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
     mqtt_client.loop_start()
 except Exception as e:
@@ -156,6 +182,27 @@ def control_device(device, action):
         return "OK", 200
         
     return redirect(request.referrer or '/admin')
+
+@app.route('/api/history/<sensor>')
+def get_history(sensor):
+    # API для отримання історичних даних для графіків
+    if session.get('role') not in ['admin', 'user', 'guest']:
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    try:
+        with sqlite3.connect('smarthome.db') as conn:
+            c = conn.cursor()
+            # Беремо останні 20 записів
+            c.execute("SELECT value, timestamp FROM sensor_data WHERE sensor=? ORDER BY timestamp DESC LIMIT 20", (sensor,))
+            rows = c.fetchall()
+            
+        rows.reverse() # Розвертаємо, щоб старі були зліва, нові справа
+        # Відправляємо тільки час у форматі HH:MM:SS для зручності на графіку
+        data = [{"value": float(r[0]), "time": r[1].split()[1]} for r in rows if r[0].replace('.','',1).isdigit()]
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
