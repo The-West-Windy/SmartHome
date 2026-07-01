@@ -74,7 +74,11 @@
         <div class="nav flex-column nav-pills mb-auto">
             <a href="/user" class="btn mb-2 fw-bold text-start btn-primary shadow-sm"
                 style="background-color: #2e69ff; border: none;">
-                <i class="bi bi-house-door-fill me-2"></i> Мешканець
+                <i class="bi bi-person-fill me-2"></i> Мій кабінет
+            </a>
+            <a href="/logs" class="btn mb-2 fw-bold text-start btn-secondary shadow-sm text-white"
+                style="background-color: rgba(255, 255, 255, 0.1); border: none;">
+                <i class="bi bi-clock-history me-2"></i> Журнал подій
             </a>
         </div>
         <div class="mt-auto">
@@ -285,7 +289,9 @@
         })
             .then(response => {
                 if (!response.ok) {
-                    alert('Помилка виконання команди!');
+                    if (typeof showToast !== 'undefined') showToast('Помилка виконання команди!', 'danger text-white');
+                } else {
+                    if (typeof showToast !== 'undefined') showToast(`Пристрій ${device.toUpperCase()} переведено в режим ${action.toUpperCase()}`, 'success text-white');
                 }
             })
             .catch(error => {

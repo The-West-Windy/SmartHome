@@ -158,10 +158,13 @@
 
     <div style="z-index: 10; position: relative;">
         {% block content %}
-        {% endblock %}
+    {% endblock %}
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer" style="z-index: 1100">
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap Bundle with Popper --><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -372,11 +375,48 @@
                         if (labelUser) labelUser.innerText = isOn ? 'On' : 'Off';
                     }
                     
+                    // Alert logic
+                    if (sensor === 'motion' && isOn) {
+                        showToast('<i class="bi bi-person-walking me-2"></i> Виявлено рух в холі!', 'warning text-dark');
+                    } else if (sensor === 'door' && isOn) {
+                        showToast('<i class="bi bi-door-open me-2"></i> Вхідні двері ВІДЧИНЕНО!', 'danger');
+                    } else if (sensor === 'alarm' && isOn) {
+                        showToast('<i class="bi bi-shield-slash me-2"></i> СПРАЦЮВАЛА СИГНАЛІЗАЦІЯ!', 'danger text-white');
+                    }
+                    
                     // Dispatch custom event for child pages (like charts)
                     document.dispatchEvent(new CustomEvent('sensor_data_received', { detail: msg }));
                 });
             }
         });
+
+        // Global Toast Function
+        function showToast(message, type = 'primary') {
+            const container = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+            
+            const btnClass = type.includes('warning') || type.includes('light') ? 'btn-close' : 'btn-close btn-close-white';
+            
+            const toastHtml = `
+                <div id="${toastId}" class="toast align-items-center text-bg-${type} border-0 mb-2 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body fw-medium fs-6">
+                            ${message}
+                        </div>
+                        <button type="button" class="${btnClass} me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', toastHtml);
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+            toast.show();
+            
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
+            });
+        }
     </script>
 </body>
 

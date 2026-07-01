@@ -16,6 +16,11 @@ def init_db():
                       sensor TEXT,
                       value TEXT,
                       timestamp DATETIME DEFAULT (datetime('now', 'localtime')))''')
+        c.execute('''CREATE TABLE IF NOT EXISTS activity_log
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      event_type TEXT,
+                      message TEXT,
+                      timestamp DATETIME DEFAULT (datetime('now', 'localtime')))''')
         conn.commit()
 
 def save_to_db(sensor, value):
@@ -23,6 +28,15 @@ def save_to_db(sensor, value):
         with sqlite3.connect('smarthome.db') as conn:
             c = conn.cursor()
             c.execute("INSERT INTO sensor_data (sensor, value) VALUES (?, ?)", (sensor, value))
+            conn.commit()
+    except Exception as e:
+        print(f"DB Error: {e}")
+
+def log_activity(event_type, message):
+    try:
+        with sqlite3.connect('smarthome.db') as conn:
+            c = conn.cursor()
+            c.execute("INSERT INTO activity_log (event_type, message) VALUES (?, ?)", (event_type, message))
             conn.commit()
     except Exception as e:
         print(f"DB Error: {e}")
@@ -78,6 +92,19 @@ def on_message(client, userdata, msg):
         # Зберігаємо історію тільки для числових датчиків
         if sensor_key in ['temperature', 'humidity', 'gas', 'soil']:
             save_to_db(sensor_key, payload)
+            
+        # Логування важливих подій
+        if sensor_key == 'motion' and payload == 'ON':
+            log_activity('alert', 'Motion detected in hall')
+        elif sensor_key == 'door' and payload == 'OPEN':
+            log_activity('alert', 'Front door opened')
+        elif sensor_key == 'power':
+            if payload == 'online':
+                log_activity('status', 'Main power restored (220V)')
+            else:
+                log_activity('alert', 'Main power lost. Running on battery')
+        elif sensor_key == 'alarm' and payload == 'ON':
+            log_activity('alert', 'ALARM TRIGGERED!')
             
         socketio.emit('sensor_update', {'sensor': sensor_key, 'value': payload})
 
@@ -163,19 +190,25 @@ def control_device(device, action):
     if session.get('role') not in ['admin', 'user']:
         return "Дію заборонено", 403
 
+    user_role = session.get('role').capitalize()
+
     if device == "room1":
         mqtt_client.publish("home/light/room1", action.upper())
         smart_home_data["room1_status"] = action.upper()  #фіксуємо новий стан в системі
+        log_activity('action', f"Room 1 light turned {action.upper()} by {user_role}")
     elif device == "room2":
         mqtt_client.publish("home/light/room2", action.upper())
         smart_home_data["room2_status"] = action.upper()  #фіксуємо новий стан в системі
+        log_activity('action', f"Room 2 light turned {action.upper()} by {user_role}")
     elif device == "pump":
         mqtt_client.publish("home/garden/pump", action.upper())
         smart_home_data["pump_status"] = action.upper()   #фіксуємо новий стан в системі
+        log_activity('action', f"Pump turned {action.upper()} by {user_role}")
     elif device == "security":
         #змінювати режим охорони дозволено тільки адміну
         if session.get('role') == 'admin':
             mqtt_client.publish("home/security/mode", action.upper())
+            log_activity('action', f"Security mode changed to {action.upper()} by Admin")
 
     #якщо запит прийшов через JS, повертаємо просто "OK" без перезавантаження сторінки
     if request.referrer is None or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -202,6 +235,23 @@ def get_history(sensor):
         return jsonify(data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/logs')
+def view_logs():
+    if session.get('role') not in ['admin', 'user']:
+        return redirect('/login')
+        
+    try:
+        with sqlite3.connect('smarthome.db') as conn:
+            c = conn.cursor()
+            c.execute("SELECT event_type, message, timestamp FROM activity_log ORDER BY timestamp DESC LIMIT 100")
+            rows = c.fetchall()
+            logs = [{"type": r[0], "message": r[1], "timestamp": r[2]} for r in rows]
+    except Exception as e:
+        logs = []
+        print(f"DB Error fetching logs: {e}")
+        
+    return render_template('logs.html', logs=logs)
 
 
 if __name__ == '__main__':
