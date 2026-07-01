@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex" style="min-height: 100vh;">
+    <!-- Sidebar -->
+    <div class="d-flex flex-column p-4 shadow-sm"
+        style="width: 250px; background-color: var(--custom-sidebar-bg); z-index: 10;">
+        <h2 class="mt-4 mb-4 text-body-emphasis" style="font-weight: bold;">Панель ДІМ</h2>
+        <div class="nav flex-column nav-pills mb-auto">
+            <a href="/admin" class="btn mb-2 fw-bold text-start btn-secondary shadow-sm text-white"
+                style="background-color: rgba(255, 255, 255, 0.1); border: none;">
+                <i class="bi bi-sliders me-2"></i> Головна
+            </a>
+            <a href="/logs" class="btn mb-2 fw-bold text-start btn-secondary shadow-sm text-white"
+                style="background-color: rgba(255, 255, 255, 0.1); border: none;">
+                <i class="bi bi-clock-history me-2"></i> Журнал подій
+            </a>
+            <a href="/settings" class="btn mb-2 fw-bold text-start btn-primary shadow-sm"
+                style="background-color: #2e69ff; border: none;">
+                <i class="bi bi-gear-fill me-2"></i> Налаштування
+            </a>
+        </div>
+        <div class="mt-auto">
+            <a href="/logout" class="btn btn-danger w-100 fw-bold shadow-sm"
+                style="background-color: #b90e0a; border: none;">
+                <i class="bi bi-box-arrow-right me-2"></i> Вихід
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-grow-1 p-5" style="overflow-y: auto;">
+        <h2 class="fw-bold mb-4"><i class="bi bi-gear-fill me-2 text-primary"></i>Системні Налаштування</h2>
+
+        <!-- Global Settings -->
+        <div class="card shadow-sm border-0 mb-5 p-4" style="border-radius: 15px;">
+            <h4 class="fw-bold mb-4">Налаштування Email та Сповіщень</h4>
+            <form action="/settings" method="POST">
+                <input type="hidden" name="action" value="save_settings">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Email Відправника (Sender)</label>
+                        <input type="email" class="form-control" name="email_sender" value="{{ settings.email_sender }}" placeholder="example@gmail.com">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Пароль додатку (App Password)</label>
+                        <input type="password" class="form-control" name="email_password" value="{{ settings.email_password }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Email Отримувача (Receiver)</label>
+                        <input type="email" class="form-control" name="email_receiver" value="{{ settings.email_receiver }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Затримка між листами (сек)</label>
+                        <input type="number" class="form-control" name="email_cooldown" value="{{ settings.email_cooldown }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Критичний поріг Газу/Диму (PPM)</label>
+                        <input type="number" class="form-control" name="gas_threshold" value="{{ settings.gas_threshold }}">
+                    </div>
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-primary fw-bold px-4"><i class="bi bi-save me-2"></i> Зберегти Налаштування</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Rules Engine -->
+        <div class="card shadow-sm border-0 p-4" style="border-radius: 15px;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold m-0">Автоматизації (Rules Engine)</h4>
+                <button class="btn btn-success fw-bold" data-bs-toggle="modal" data-bs-target="#addRuleModal"><i class="bi bi-plus-circle me-2"></i> Додати Правило</button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle border-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Назва правила</th>
+                            <th>Дія</th>
+                            <th>Тривалість</th>
+                            <th>Статус</th>
+                            <th class="text-end">Керування</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rule in rules %}
+                        <tr>
+                            <td class="fw-bold">{{ rule.name }}</td>
+                            <td><span class="badge bg-primary fs-6">{{ rule.action_device }} -> {{ rule.action_state }}</span></td>
+                            <td>{% if rule.action_duration %}{{ rule.action_duration }} хв{% else %}-{% endif %}</td>
+                            <td>
+                                <form action="/settings" method="POST" class="d-inline">
+                                    <input type="hidden" name="action" value="toggle_rule">
+                                    <input type="hidden" name="rule_id" value="{{ rule.id }}">
+                                    <input type="hidden" name="state" value="{% if rule.is_active %}false{% else %}true{% endif %}">
+                                    <button type="submit" class="btn btn-sm {% if rule.is_active %}btn-success{% else %}btn-secondary{% endif %} fw-bold">
+                                        {% if rule.is_active %}АКТИВНО{% else %}ВИМКНЕНО{% endif %}
+                                    </button>
+                                </form>
+                            </td>
+                            <td class="text-end">
+                                <form action="/settings" method="POST" class="d-inline" onsubmit="return confirm('Видалити правило?');">
+                                    <input type="hidden" name="action" value="delete_rule">
+                                    <input type="hidden" name="rule_id" value="{{ rule.id }}">
+                                    <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">Немає активних правил автоматизації.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Rule Modal -->
+<div class="modal fade" id="addRuleModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Нове правило автоматизації</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addRuleForm" action="/settings" method="POST">
+                    <input type="hidden" name="action" value="add_rule">
+                    <input type="hidden" name="conditions_json" id="conditions_json">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Назва правила</label>
+                        <input type="text" class="form-control" name="name" required placeholder="Напр., Полив саду">
+                    </div>
+
+                    <div class="card bg-light border-0 mb-4">
+                        <div class="card-body" id="conditions-container">
+                            <h6 class="fw-bold mb-3">Умови (IF)</h6>
+                            <!-- Conditions will be injected here by JS -->
+                        </div>
+                        <div class="card-footer bg-transparent border-0 text-end">
+                            <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="addCondition('AND')">+ AND</button>
+                            <button type="button" class="btn btn-sm btn-outline-info fw-bold" onclick="addCondition('OR')">+ OR</button>
+                        </div>
+                    </div>
+
+                    <div class="card border-primary border-opacity-25 mb-3">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-3 text-primary">Дія (THEN)</h6>
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <select class="form-select" name="action_device" required>
+                                        <option value="pump">Помпа (Сад)</option>
+                                        <option value="room1">Світло (Кімн 1)</option>
+                                        <option value="room2">Світло (Кімн 2)</option>
+                                        <option value="security">Охорона</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <select class="form-select" name="action_state" required>
+                                        <option value="ON">Увімкнути (ON/ARM)</option>
+                                        <option value="OFF">Вимкнути (OFF/DISARM)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="number" class="form-control" name="action_duration" placeholder="Час (хвилин), опц.">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-end mt-4">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                        <button type="submit" class="btn btn-primary fw-bold">Зберегти Правило</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let conditionCount = 0;
+    
+    function getSensorOptions() {
+        return `
+            <option value="temperature">Температура</option>
+            <option value="humidity">Вологість</option>
+            <option value="soil">Вологість ґрунту</option>
+            <option value="gas">Газ / Дим</option>
+            <option value="motion">Датчик руху</option>
+            <option value="door">Вхідні двері</option>
+            <option value="security_mode">Режим охорони</option>
+        `;
+    }
+
+    function getOperatorOptions() {
+        return `
+            <option value="==">Рівно (==)</option>
+            <option value="!=">Не рівно (!=)</option>
+            <option value=">">Більше (>)</option>
+            <option value="<">Менше (<)</option>
+        `;
+    }
+
+    function addCondition(logicType = null) {
+        const container = document.getElementById('conditions-container');
+        
+        if (conditionCount > 0 && logicType) {
+            const logicHtml = `
+                <div class="d-flex justify-content-center my-2 logic-row" data-logic="${logicType}">
+                    <span class="badge bg-secondary px-3 py-2 fs-6">${logicType}</span>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', logicHtml);
+        }
+
+        const condHtml = `
+            <div class="row g-2 align-items-center condition-row" id="cond-${conditionCount}">
+                <div class="col-md-4">
+                    <select class="form-select cond-sensor">
+                        ${getSensorOptions()}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select cond-operator">
+                        ${getOperatorOptions()}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control cond-value" placeholder="Значення (напр. 2500, ON, ARM)">
+                </div>
+                <div class="col-md-1 text-end">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.condition-row').remove(); updateLogicRows();"><i class="bi bi-x-lg"></i></button>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', condHtml);
+        conditionCount++;
+    }
+
+    function updateLogicRows() {
+        // Simple UI cleanup function if needed
+    }
+
+    document.getElementById('addRuleForm').addEventListener('submit', function(e) {
+        const container = document.getElementById('conditions-container');
+        const elements = container.children;
+        let conditions = [];
+        
+        for (let el of elements) {
+            if (el.classList.contains('logic-row')) {
+                conditions.push({ "logic": el.getAttribute('data-logic') });
+            } else if (el.classList.contains('condition-row')) {
+                const sensor = el.querySelector('.cond-sensor').value;
+                const operator = el.querySelector('.cond-operator').value;
+                const val = el.querySelector('.cond-value').value;
+                conditions.push({ "sensor": sensor, "operator": operator, "value": val });
+            }
+        }
+        
+        document.getElementById('conditions_json').value = JSON.stringify(conditions);
+    });
+
+    // Add first condition row by default
+    document.addEventListener("DOMContentLoaded", () => {
+        addCondition();
+    });
+</script>
+{% endblock %}

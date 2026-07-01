@@ -2,6 +2,12 @@ from flask import Flask, render_template, request, redirect, session, jsonify #�
 import paho.mqtt.client as mqtt
 from flask_socketio import SocketIO
 import sqlite3
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import time
+import json
+import threading
 
 app = Flask(__name__)
 
@@ -21,6 +27,16 @@ def init_db():
                       event_type TEXT,
                       message TEXT,
                       timestamp DATETIME DEFAULT (datetime('now', 'localtime')))''')
+        c.execute('''CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)''')
+        c.execute('''CREATE TABLE IF NOT EXISTS rules (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, conditions_json TEXT, action_device TEXT, action_state TEXT, action_duration INTEGER, is_active BOOLEAN)''')
+        
+        # Default settings
+        c.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('email_sender', '')")
+        c.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('email_password', '')")
+        c.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('email_receiver', '')")
+        c.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('email_cooldown', '60')")
+        c.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('gas_threshold', '2200')")
+        
         conn.commit()
 
 def save_to_db(sensor, value):
@@ -40,6 +56,125 @@ def log_activity(event_type, message):
             conn.commit()
     except Exception as e:
         print(f"DB Error: {e}")
+
+last_email_time = 0
+
+def get_setting(key, default=""):
+    try:
+        with sqlite3.connect('smarthome.db') as conn:
+            c = conn.cursor()
+            c.execute("SELECT value FROM settings WHERE key=?", (key,))
+            row = c.fetchone()
+            return row[0] if row else default
+    except:
+        return default
+
+def send_email_alert(subject, body):
+    global last_email_time
+    cooldown = int(get_setting('email_cooldown', '60'))
+    if time.time() - last_email_time < cooldown:
+        return
+
+    sender = get_setting('email_sender')
+    password = get_setting('email_password')
+    receiver = get_setting('email_receiver')
+    
+    if not sender or not password or not receiver:
+        print("Email settings not configured.")
+        return
+
+    msg = MIMEMultipart()
+    msg['From'] = sender
+    msg['To'] = receiver
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+
+    def send_async():
+        global last_email_time
+        try:
+            server = smtplib.SMTP('smtp.gmail.com', 587)
+            server.starttls()
+            server.login(sender, password)
+            server.send_message(msg)
+            server.quit()
+            print(f"[{time.strftime('%H:%M:%S')}] Email успішно відправлено: {subject}")
+            last_email_time = time.time()
+        except Exception as e:
+            print(f"Помилка відправки Email: {e}")
+            
+    threading.Thread(target=send_async).start()
+
+def revert_action(device, old_state):
+    topic_map_rev = {
+        "room1": "home/light/room1",
+        "room2": "home/light/room2",
+        "pump": "home/garden/pump",
+        "security": "home/security/mode"
+    }
+    if device in topic_map_rev:
+        mqtt_client.publish(topic_map_rev[device], old_state)
+        status_key = f"{device}_status" if device != 'security' else 'security_mode'
+        smart_home_data[status_key] = old_state
+        socketio.emit('sensor_update', {'sensor': status_key, 'value': old_state})
+        log_activity('action', f"Automated revert: {device} set to {old_state}")
+
+def evaluate_rules():
+    try:
+        with sqlite3.connect('smarthome.db') as conn:
+            c = conn.cursor()
+            c.execute("SELECT name, conditions_json, action_device, action_state, action_duration FROM rules WHERE is_active=1")
+            rules = c.fetchall()
+            
+        for rule in rules:
+            name, conditions_json, act_device, act_state, act_dur = rule
+            conditions = json.loads(conditions_json)
+            
+            result = True
+            current_logic = "AND"
+            
+            for item in conditions:
+                if "logic" in item:
+                    current_logic = item["logic"]
+                else:
+                    sensor = item["sensor"]
+                    op = item["operator"]
+                    val = item["value"]
+                    
+                    c_val = smart_home_data.get(sensor, "0")
+                    cond_res = False
+                    
+                    try:
+                        f_c = float(c_val)
+                        f_t = float(val)
+                        if op == '>': cond_res = f_c > f_t
+                        elif op == '<': cond_res = f_c < f_t
+                        elif op == '==': cond_res = f_c == f_t
+                        elif op == '!=': cond_res = f_c != f_t
+                    except ValueError:
+                        c_str = str(c_val).upper()
+                        t_str = str(val).upper()
+                        if op == '==': cond_res = c_str == t_str
+                        elif op == '!=': cond_res = c_str != t_str
+                        
+                    if current_logic == "AND": result = result and cond_res
+                    elif current_logic == "OR": result = result or cond_res
+                    
+            if result:
+                status_key = f"{act_device}_status" if act_device != 'security' else 'security_mode'
+                if smart_home_data.get(status_key) != act_state:
+                    topic_map_rev = {"room1": "home/light/room1", "room2": "home/light/room2", "pump": "home/garden/pump", "security": "home/security/mode"}
+                    if act_device in topic_map_rev:
+                        old_state = smart_home_data.get(status_key, "OFF")
+                        mqtt_client.publish(topic_map_rev[act_device], act_state)
+                        smart_home_data[status_key] = act_state
+                        socketio.emit('sensor_update', {'sensor': status_key, 'value': act_state})
+                        log_activity('action', f"Rule '{name}' triggered: {act_device} -> {act_state}")
+                        
+                        if act_dur and int(act_dur) > 0:
+                            threading.Timer(int(act_dur) * 60, revert_action, args=[act_device, old_state]).start()
+                            
+    except Exception as e:
+        print(f"Rule Evaluation Error: {e}")
 
 smart_home_data = {
     "temperature": "0.0",
@@ -93,20 +228,36 @@ def on_message(client, userdata, msg):
         if sensor_key in ['temperature', 'humidity', 'gas', 'soil']:
             save_to_db(sensor_key, payload)
             
-        # Логування важливих подій
+        # Логування важливих подій та відправка email
         if sensor_key == 'motion' and payload == 'ON':
             log_activity('alert', 'Motion detected in hall')
+            if smart_home_data.get('security_mode') == 'ARM':
+                send_email_alert("ТРИВОГА - РУХ", "Зафіксовано несанкціонований рух у будинку (Режим охорони).")
         elif sensor_key == 'door' and payload == 'OPEN':
             log_activity('alert', 'Front door opened')
+            if smart_home_data.get('security_mode') == 'ARM':
+                send_email_alert("ТРИВОГА - ВТОРГНЕННЯ", "Вхідні двері були відчинені в режимі охорони!")
         elif sensor_key == 'power':
             if payload == 'online':
                 log_activity('status', 'Main power restored (220V)')
+                send_email_alert("Живлення відновлено", "Основне живлення 220В успішно відновлено.")
             else:
                 log_activity('alert', 'Main power lost. Running on battery')
+                send_email_alert("БЛЕКАУТ - Розумний Будинок", "Увага! Зникло живлення 220В. Систему переведено на ДБЖ.")
         elif sensor_key == 'alarm' and payload == 'ON':
             log_activity('alert', 'ALARM TRIGGERED!')
+        elif sensor_key == 'gas':
+            threshold = float(get_setting('gas_threshold', '2200'))
+            try:
+                if float(payload) > threshold:
+                    send_email_alert("КРИТИЧНА ТРИВОГА - ПОЖЕЖА", f"Датчик зафіксував критичний рівень диму/газу ({payload} PPM) в будинку!")
+            except ValueError:
+                pass
             
         socketio.emit('sensor_update', {'sensor': sensor_key, 'value': payload})
+        
+        # Evaluate Rules Engine
+        evaluate_rules()
 
 
 mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
@@ -252,6 +403,50 @@ def view_logs():
         print(f"DB Error fetching logs: {e}")
         
     return render_template('logs.html', logs=logs)
+
+
+@app.route('/settings', methods=['GET', 'POST'])
+def settings_page():
+    if session.get('role') != 'admin':
+        return redirect('/login')
+        
+    if request.method == 'POST':
+        action = request.form.get('action')
+        with sqlite3.connect('smarthome.db') as conn:
+            c = conn.cursor()
+            if action == 'save_settings':
+                for key in ['email_sender', 'email_password', 'email_receiver', 'email_cooldown', 'gas_threshold']:
+                    val = request.form.get(key, '')
+                    c.execute("UPDATE settings SET value=? WHERE key=?", (val, key))
+            elif action == 'add_rule':
+                name = request.form.get('name')
+                conditions_json = request.form.get('conditions_json')
+                act_device = request.form.get('action_device')
+                act_state = request.form.get('action_state')
+                act_dur = request.form.get('action_duration', 0)
+                if not act_dur: act_dur = 0
+                c.execute("INSERT INTO rules (name, conditions_json, action_device, action_state, action_duration, is_active) VALUES (?, ?, ?, ?, ?, 1)", 
+                          (name, conditions_json, act_device, act_state, act_dur))
+            elif action == 'delete_rule':
+                rule_id = request.form.get('rule_id')
+                c.execute("DELETE FROM rules WHERE id=?", (rule_id,))
+            elif action == 'toggle_rule':
+                rule_id = request.form.get('rule_id')
+                state = request.form.get('state')
+                is_active = 1 if state == 'true' else 0
+                c.execute("UPDATE rules SET is_active=? WHERE id=?", (is_active, rule_id))
+            conn.commit()
+        return redirect('/settings')
+        
+    with sqlite3.connect('smarthome.db') as conn:
+        c = conn.cursor()
+        c.execute("SELECT key, value FROM settings")
+        settings_dict = {row[0]: row[1] for row in c.fetchall()}
+        
+        c.execute("SELECT id, name, conditions_json, action_device, action_state, action_duration, is_active FROM rules")
+        rules = [{"id": r[0], "name": r[1], "conditions_json": r[2], "action_device": r[3], "action_state": r[4], "action_duration": r[5], "is_active": r[6]} for r in c.fetchall()]
+        
+    return render_template('settings.html', settings=settings_dict, rules=rules)
 
 
 if __name__ == '__main__':
