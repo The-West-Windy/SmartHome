@@ -76,6 +76,10 @@
                 style="background-color: #2e69ff; border: none;">
                 <i class="bi bi-sliders me-2"></i> Головна
             </a>
+            <a href="/logs" class="btn mb-2 fw-bold text-start btn-secondary shadow-sm text-white"
+                style="background-color: rgba(255, 255, 255, 0.1); border: none;">
+                <i class="bi bi-clock-history me-2"></i> Журнал подій
+            </a>
         </div>
         <div class="mt-auto">
             <a href="/logout" class="btn btn-danger w-100 fw-bold shadow-sm"
@@ -119,7 +123,7 @@
                                 <h5 class="fw-bold text-muted m-0">Режим охорони</h5>
                                 <i class="bi bi-shield-lock-fill fs-3 text-primary"></i>
                             </div>
-                            <h2 id="security-status"
+                            <h2 id="security-status" data-view="admin"
                                 class="fw-bold {% if data.security_mode == 'ARM' %}text-warning{% else %}text-success{% endif %}">
                                 {% if data.security_mode == 'ARM' %}ПІД ОХОРОНОЮ{% else %}ЗНЯТО З ОХОРОНИ{% endif %}
                             </h2>
@@ -140,11 +144,11 @@
                                 <h5 class="fw-bold text-muted m-0">Основне живлення</h5>
                                 <i class="bi bi-lightning-charge-fill fs-3 text-warning"></i>
                             </div>
-                            <h2
+                            <h2 id="val-power-text" data-view="admin"
                                 class="fw-bold {% if data.power == 'online' %}text-success{% else %}text-danger{% endif %}">
                                 {% if data.power == 'online' %}МЕРЕЖА 220V{% else %}БЛЕКАУТ{% endif %}
                             </h2>
-                            <p class="text-muted m-0 mt-3 fs-5">Резервна батарея: <strong>{{ data.battery }}%</strong>
+                            <p class="text-muted m-0 mt-3 fs-5">Резервна батарея: <strong id="val-battery">{{ data.battery }}</strong>%
                             </p>
                         </div>
                     </div>
@@ -157,11 +161,11 @@
                                 <h5 class="fw-bold text-muted m-0">Повітря та безпека</h5>
                                 <i class="bi bi-cloud-haze2-fill fs-3 text-info"></i>
                             </div>
-                            <h2
+                            <h2 id="val-gas"
                                 class="fw-bold {% if data.gas|int > 2200 %}text-danger{% else %}text-success{% endif %}">
                                 {{ data.gas }} PPM
                             </h2>
-                            <p class="text-muted m-0 mt-3 fs-6">
+                            <p id="val-gas-text" class="text-muted m-0 mt-3 fs-6">
                                 {% if data.gas|int > 2200 %}Перевищення норми диму!{% else %}Рівень газу в нормі{% endif
                                 %}
                             </p>
@@ -187,21 +191,21 @@
                                 <tbody>
                                     <tr>
                                         <td class="fw-bold">Температура (DHT11)</td>
-                                        <td class="text-center fw-bold fs-5">{{ data.temperature }} °C</td>
+                                        <td class="text-center fw-bold fs-5"><span id="val-temperature">{{ data.temperature }}</span> °C</td>
                                         <td class="text-center"><span class="badge bg-success">Норма</span></td>
                                     </tr>
                                     <tr>
                                         <td class="fw-bold">Вологість повітря</td>
-                                        <td class="text-center fw-bold fs-5">{{ data.humidity }} %</td>
+                                        <td class="text-center fw-bold fs-5"><span id="val-humidity">{{ data.humidity }}</span> %</td>
                                         <td class="text-center"><span class="badge bg-success">Норма</span></td>
                                     </tr>
                                     <tr>
                                         <td class="fw-bold">Вхідні двері (Геркон)</td>
-                                        <td class="text-center fw-bold">
+                                        <td class="text-center fw-bold val-door-text {% if data.door == 'OPEN' %}text-danger{% else %}text-success{% endif %}">
                                             {% if data.door == 'OPEN' %}ВІДЧИНЕНІ{% else %}ЗАЧИНЕНІ{% endif %}
                                         </td>
                                         <td class="text-center">
-                                            <span
+                                            <span id="badge-door"
                                                 class="badge {% if data.door == 'OPEN' %}bg-danger{% else %}bg-secondary{% endif %}">
                                                 {{ data.door }}
                                             </span>
@@ -209,11 +213,11 @@
                                     </tr>
                                     <tr>
                                         <td class="fw-bold">Датчик руху (PIR)</td>
-                                        <td class="text-center fw-bold">
+                                        <td class="text-center fw-bold val-motion-text {% if data.motion == 'ON' %}text-warning{% else %}text-success{% endif %}">
                                             {% if data.motion == 'ON' %}Є РУХ{% else %}ТИША{% endif %}
                                         </td>
                                         <td class="text-center">
-                                            <span
+                                            <span id="badge-motion"
                                                 class="badge {% if data.motion == 'ON' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
                                                 {{ data.motion }}
                                             </span>
@@ -221,9 +225,9 @@
                                     </tr>
                                     <tr>
                                         <td class="fw-bold">Вологість ґрунту</td>
-                                        <td class="text-center fw-bold fs-5">{{ data.soil }}</td>
+                                        <td class="text-center fw-bold fs-5" id="val-soil">{{ data.soil }}</td>
                                         <td class="text-center">
-                                            <span
+                                            <span id="badge-soil"
                                                 class="badge {% if data.soil|int > 2500 %}bg-danger{% else %}bg-info{% endif %}">
                                                 {% if data.soil|int > 2500 %}Сухо{% else %}Зволожено{% endif %}
                                             </span>
@@ -300,6 +304,24 @@
                 </div>
             </div>
 
+            <div class="row g-4 mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm border-0 p-4" style="border-radius: 15px;">
+                        <h4 class="fw-bold mb-4 text-body-emphasis"><i class="bi bi-graph-up me-2 text-primary"></i>Аналітика за 24 години</h4>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold text-muted text-center">Історія Температури (°C)</h6>
+                                <canvas id="temperatureChart"></canvas>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold text-muted text-center">Історія Вологості (%)</h6>
+                                <canvas id="humidityChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -316,7 +338,11 @@
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
             .then(response => {
-                if (!response.ok) alert('Помилка виконання команди!');
+                if (!response.ok) {
+                    if (typeof showToast !== 'undefined') showToast('Помилка виконання команди!', 'danger text-white');
+                } else {
+                    if (typeof showToast !== 'undefined') showToast(`Пристрій ${device.toUpperCase()} переведено в режим ${action.toUpperCase()}`, 'success text-white');
+                }
             })
             .catch(error => console.error('Error:', error));
     }
@@ -338,9 +364,62 @@
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
             .then(response => {
-                if (!response.ok) alert('Помилка зміни режиму охорони!');
+                if (!response.ok) {
+                    if (typeof showToast !== 'undefined') showToast('Помилка зміни режиму охорони!', 'danger text-white');
+                } else {
+                    const statusText = action === 'arm' ? 'СИСТЕМА ПІД ОХОРОНОЮ' : 'СИСТЕМУ ЗНЯТО З ОХОРОНИ';
+                    const toastType = action === 'arm' ? 'warning text-dark' : 'info text-white';
+                    if (typeof showToast !== 'undefined') showToast(`<i class="bi bi-shield-check me-2"></i> ${statusText}`, toastType);
+                }
             })
             .catch(error => console.error('Error:', error));
     }
+
+    // Chart.js логіка
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctxTemp = document.getElementById('temperatureChart');
+        const ctxHum = document.getElementById('humidityChart');
+        if (!ctxTemp || !ctxHum) return;
+
+        const createChart = (ctx, label, color) => {
+            return new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: label, data: [], borderColor: color, tension: 0.4, fill: true, backgroundColor: color + '33' }] },
+                options: { responsive: true, animation: { duration: 500 }, scales: { x: { ticks: { maxTicksLimit: 10 } } } }
+            });
+        };
+
+        const tempChart = createChart(ctxTemp, 'Температура (°C)', '#dc3545');
+        const humChart = createChart(ctxHum, 'Вологість (%)', '#0d6efd');
+
+        const loadData = (sensor, chart) => {
+            fetch(`/api/history/${sensor}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) return;
+                    chart.data.labels = data.map(d => d.time);
+                    chart.data.datasets[0].data = data.map(d => d.value);
+                    chart.update();
+                });
+        };
+
+        loadData('temperature', tempChart);
+        loadData('humidity', humChart);
+
+        document.addEventListener('sensor_data_received', function(e) {
+            const msg = e.detail;
+            const now = new Date().toLocaleTimeString('uk-UA', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            
+            const updateChart = (chart, value) => {
+                chart.data.labels.push(now);
+                chart.data.datasets[0].data.push(parseFloat(value));
+                if (chart.data.labels.length > 20) { chart.data.labels.shift(); chart.data.datasets[0].data.shift(); }
+                chart.update();
+            };
+
+            if (msg.sensor === 'temperature') updateChart(tempChart, msg.value);
+            if (msg.sensor === 'humidity') updateChart(humChart, msg.value);
+        });
+    });
 </script>
 {% endblock %}

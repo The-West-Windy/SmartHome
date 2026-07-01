@@ -56,13 +56,13 @@
                             <div class="text-center">
                                 <i class="bi bi-thermometer-sun text-danger" style="font-size: 3rem;"></i>
                                 <h5 class="text-muted mt-2">Температура</h5>
-                                <h1 class="fw-bold text-body-emphasis m-0">{{ data.temperature }} °C</h1>
+                                <h1 class="fw-bold text-body-emphasis m-0"><span id="val-temperature">{{ data.temperature }}</span> °C</h1>
                             </div>
                             <div class="vr" style="height: 100px;"></div>
                             <div class="text-center">
                                 <i class="bi bi-droplet-half text-primary" style="font-size: 3rem;"></i>
                                 <h5 class="text-muted mt-2">Вологість</h5>
-                                <h1 class="fw-bold text-body-emphasis m-0">{{ data.humidity }} %</h1>
+                                <h1 class="fw-bold text-body-emphasis m-0"><span id="val-humidity">{{ data.humidity }}</span> %</h1>
                             </div>
                         </div>
                     </div>
@@ -79,7 +79,7 @@
                                 <h5 class="fw-bold m-0">Статус зовнішньої мережі</h5>
                                 <small class="text-muted">Детекція основного входу 220V</small>
                             </div>
-                            <span
+                            <span id="badge-power"
                                 class="badge fs-6 px-3 py-2 {% if data.power == 'online' %}bg-success{% else %}bg-danger{% endif %}">
                                 {% if data.power == 'online' %}АКТИВНА{% else %}БЛЕКАУТ{% endif %}
                             </span>
@@ -90,7 +90,7 @@
                                 <h5 class="fw-bold m-0">Заряд резервного акумулятора</h5>
                                 <small class="text-muted">ДБЖ на базі елементів 18650</small>
                             </div>
-                            <span class="fs-4 fw-bold text-primary">{{ data.battery }} %</span>
+                            <span class="fs-4 fw-bold text-primary"><span id="val-battery">{{ data.battery }}</span> %</span>
                         </div>
                     </div>
                 </div>
@@ -109,7 +109,7 @@
                                     <i class="bi bi-door-closed fs-2 text-secondary mb-2"></i>
                                     <h6 class="text-muted">Стан вхідних дверей</h6>
                                     <h5
-                                        class="fw-bold m-0 {% if data.door == 'OPEN' %}text-danger{% else %}text-success{% endif %}">
+                                        class="fw-bold m-0 val-door-text {% if data.door == 'OPEN' %}text-danger{% else %}text-success{% endif %}">
                                         {% if data.door == 'OPEN' %}ВІДЧИНЕНІ{% else %}ЗАЧИНЕНІ{% endif %}
                                     </h5>
                                 </div>
@@ -120,7 +120,7 @@
                                     <i class="bi bi-person-walking fs-2 text-secondary mb-2"></i>
                                     <h6 class="text-muted">Сенсор руху в холі</h6>
                                     <h5
-                                        class="fw-bold m-0 {% if data.motion == 'ON' %}text-warning{% else %}text-success{% endif %}">
+                                        class="fw-bold m-0 val-motion-text {% if data.motion == 'ON' %}text-warning{% else %}text-success{% endif %}">
                                         {% if data.motion == 'ON' %}Є РУХ{% else %}ТИША{% endif %}
                                     </h5>
                                 </div>
@@ -130,7 +130,7 @@
                                 <div class="p-3 border rounded-3 text-center bg-body-tertiary">
                                     <i class="bi bi-lock fs-2 text-secondary mb-2"></i>
                                     <h6 class="text-muted">Загальний режим периметру</h6>
-                                    <h5
+                                    <h5 id="security-status" data-view="guest"
                                         class="fw-bold m-0 {% if data.security_mode == 'ARM' %}text-warning{% else %}text-secondary{% endif %}">
                                         {% if data.security_mode == 'ARM' %}РЕЖИМ ОХОРОНИ{% else %}БЕЗ ОХОРОНИ{% endif
                                         %}

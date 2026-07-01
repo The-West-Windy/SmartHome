@@ -4,7 +4,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import time
 
-MQTT_BROKER = "127.0.0.1"
+MQTT_BROKER = "test.mosquitto.org"
 MQTT_PORT = 1883
 
 EMAIL_SENDER = "[EMAIL_ADDRESS]"
@@ -36,8 +36,8 @@ def send_email_alert(subject, body):
     except Exception as e:
         print(f"Помилка відправки Email: {e}")
 
-def on_connect(client, userdata, flags, rc):
-    print(f"Підключено до MQTT-брокера з кодом: {rc}")
+def on_connect(client, userdata, flags, reason_code, properties):
+    print(f"Підключено до MQTT-брокера з кодом: {reason_code}")
     client.subscribe("home/#")
 
 def on_message(client, userdata, msg):
@@ -64,7 +64,7 @@ def on_message(client, userdata, msg):
 
 print("Запуск сервера Розумного Будинку...")
 
-client = mqtt.Client()
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 client.on_connect = on_connect
 client.on_message = on_message
 
