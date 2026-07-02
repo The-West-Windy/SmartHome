@@ -1,9 +1,36 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="d-flex" style="min-height: 100vh;">
+<div class="d-flex flex-column flex-md-row" style="min-height: 100vh; background-color: transparent;">
+
+    <div class="d-flex d-md-none mobile-sidebar p-4 shadow-sm"
+        style="width: 100%; background-color: var(--custom-sidebar-bg); z-index: 10;">
+        <h2 style="font-weight: bold; margin: 0; font-size: 1.25rem;">Панель ДІМ</h2>
+        <div class="d-flex gap-2 ms-auto align-items-center">
+            <a href="/admin" class="btn btn-sm btn-sidebar fw-bold shadow-sm"
+                style="padding: 6px 12px; font-size: 0.85rem;">
+                <i class="bi bi-sliders"></i>
+            </a>
+            
+            <div class="dropdown">
+                <button class="btn btn-sm btn-primary fw-bold shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: #2e69ff; border: none; padding: 6px 12px; font-size: 0.85rem;">
+                    <i class="bi bi-list"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                    <li><a class="dropdown-item fw-medium py-2" href="/logs"><i class="bi bi-clock-history me-2 text-primary"></i>Журнал подій</a></li>
+                    <li><a class="dropdown-item fw-medium py-2 active" href="/settings"><i class="bi bi-gear-fill me-2 text-primary"></i>Налаштування</a></li>
+                </ul>
+            </div>
+            
+            <a href="/logout" class="btn btn-sm btn-danger fw-bold shadow-sm"
+                style="background-color: #b90e0a; border: none; padding: 6px 12px; font-size: 0.85rem;">
+                <i class="bi bi-box-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+
     <!-- Sidebar -->
-    <div class="d-flex flex-column p-4 shadow-sm"
+    <div class="d-none d-md-flex flex-column p-4 shadow-sm"
         style="width: 250px; background-color: var(--custom-sidebar-bg); z-index: 10;">
         <h2 class="mt-4 mb-4 text-body-emphasis" style="font-weight: bold;">Панель ДІМ</h2>
         <div class="nav flex-column nav-pills mb-auto">
@@ -27,7 +54,7 @@
     </div>
 
     <!-- Main Content -->
-    <div class="flex-grow-1 p-5" style="overflow-y: auto;">
+    <div class="flex-grow-1 p-3 p-md-5 mobile-content" style="overflow-y: auto;">
         <h2 class="fw-bold mb-4"><i class="bi bi-gear-fill me-2 text-primary"></i>Системні Налаштування</h2>
 
         <!-- Global Settings -->
@@ -36,23 +63,23 @@
             <form action="/settings" method="POST">
                 <input type="hidden" name="action" value="save_settings">
                 <div class="row g-3">
-                    <div class="col-md-6">
+                    <div class="col-md-6 col-12">
                         <label class="form-label fw-bold">Email Відправника (Sender)</label>
                         <input type="email" class="form-control" name="email_sender" value="{{ settings.email_sender }}" placeholder="example@gmail.com">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 col-12">
                         <label class="form-label fw-bold">Пароль додатку (App Password)</label>
                         <input type="password" class="form-control" name="email_password" value="{{ settings.email_password }}">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 col-12">
                         <label class="form-label fw-bold">Email Отримувача (Receiver)</label>
                         <input type="email" class="form-control" name="email_receiver" value="{{ settings.email_receiver }}">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 col-12">
                         <label class="form-label fw-bold">Затримка між листами (сек)</label>
                         <input type="number" class="form-control" name="email_cooldown" value="{{ settings.email_cooldown }}">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 col-12">
                         <label class="form-label fw-bold">Критичний поріг Газу/Диму (PPM)</label>
                         <input type="number" class="form-control" name="gas_threshold" value="{{ settings.gas_threshold }}">
                     </div>
@@ -152,7 +179,7 @@
                         <div class="card-body">
                             <h6 class="fw-bold mb-3 text-primary">Дія (THEN)</h6>
                             <div class="row g-2">
-                                <div class="col-md-4">
+                                <div class="col-md-4 col-12">
                                     <select class="form-select" name="action_device" required>
                                         <option value="pump">Помпа (Сад)</option>
                                         <option value="room1">Світло (Кімн 1)</option>
@@ -160,13 +187,13 @@
                                         <option value="security">Охорона</option>
                                     </select>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-4 col-12">
                                     <select class="form-select" name="action_state" required>
                                         <option value="ON">Увімкнути (ON/ARM)</option>
                                         <option value="OFF">Вимкнути (OFF/DISARM)</option>
                                     </select>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-4 col-12">
                                     <input type="number" class="form-control" name="action_duration" placeholder="Час (хвилин), опц.">
                                 </div>
                             </div>
