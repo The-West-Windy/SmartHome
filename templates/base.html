@@ -158,7 +158,8 @@
 
     <div style="z-index: 10; position: relative;">
         {% block content %}
-    {% endblock %}
+        {% endblock %}
+    </div>
 
     <!-- Toast Container -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer" style="z-index: 1100">
@@ -418,6 +419,8 @@
             });
         }
     </script>
+    
+    {% block modals %}{% endblock %}
 </body>
 
 </html>
