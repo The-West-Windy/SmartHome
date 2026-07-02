@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="card shadow-sm p-4" style="width: 100%; max-width: 400px; border-radius: 15px; border: none;">
+
+        <h3 class="text-center mb-4 fw-bold text-body-emphasis">Smart Home Manager</h3>
+
+        <div class="text-center mb-4">
+            <span class="badge bg-light text-dark fs-5 px-4 py-2 border">Вхід</span>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger text-center">{{ error }}</div>
+        {% endif %}
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-success text-center mb-4">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post">
+
+            <div class="mb-3">
+                <input type="text" name="username" class="form-control form-control-lg" placeholder="Логін" required>
+            </div>
+            <div class="mb-3">
+                <input type="password" name="password" class="form-control form-control-lg" placeholder="Пароль"
+                    required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold"
+                style="background-color: #2e69ff; border: none;">
+                Увійти
+            </button>
+        </form>
+
+        <div class="text-center mt-4">
+            <small class="text-muted">Ще не зареєстровані? <a href="{{ url_for('register') }}"
+                    class="text-decoration-none">Створити акаунт</a></small>
+        </div>
+    </div>
+</div>
+{% endblock %}

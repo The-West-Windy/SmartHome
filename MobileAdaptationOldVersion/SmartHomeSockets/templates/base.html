@@ -46,6 +46,14 @@
         }
 
         /* Адаптивні кольори для бокової панелі та шапки */
+        [data-bs-theme="light"] {
+            --custom-sidebar-bg: #dadddf;
+            --custom-text-color: #1c2833;
+            --triangle-stroke: #ffffff;
+            --shape-rect: #1c2833;
+            /* Темний квадрат вдень */
+        }
+
         [data-bs-theme="dark"] {
             --custom-sidebar-bg: #212529;
             /* Темно-сірий для панелі */
@@ -55,44 +63,6 @@
             /* Темні лінії між трикутниками */
             --shape-rect: #6c757d;
             /* Світло-сірий квадрат вночі */
-            --sidebar-btn-bg: rgba(255, 255, 255, 0.1);
-            --sidebar-btn-hover: rgba(255, 255, 255, 0.15);
-            --sidebar-btn-text: #f8f9fa;
-        }
-
-        [data-bs-theme="light"] {
-            --custom-sidebar-bg: #dadddf;
-            --custom-text-color: #1c2833;
-            --triangle-stroke: #ffffff;
-            --shape-rect: #1c2833;
-            /* Темний квадрат вдень */
-            --sidebar-btn-bg: rgba(0, 0, 0, 0.08);
-            --sidebar-btn-hover: rgba(0, 0, 0, 0.12);
-            --sidebar-btn-text: #1c2833;
-        }
-
-        .btn-sidebar {
-            background-color: var(--sidebar-btn-bg) !important;
-            color: var(--sidebar-btn-text) !important;
-            border: none;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-
-        .btn-sidebar:hover {
-            background-color: var(--sidebar-btn-hover) !important;
-            color: var(--sidebar-btn-text) !important;
-        }
-
-        [data-bs-theme="dark"] .adaptive-table-header th {
-            background-color: #2c3034 !important;
-            color: #f8f9fa !important;
-            border-bottom-color: #495057 !important;
-        }
-
-        [data-bs-theme="light"] .adaptive-table-header th {
-            background-color: #f8f9fa !important;
-            color: #212529 !important;
-            border-bottom-color: #dee2e6 !important;
         }
 
         body {
@@ -202,7 +172,7 @@
                 font-size: 0.95rem !important;
             }
             .card p {
-                font-size: 0.9rem !important;
+                font-size: 0.9 Fleming !important;
             }
         }
     </style>
@@ -234,11 +204,7 @@
         {% endblock %}
     </div>
 
-    <!-- Toast Container -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer" style="z-index: 1100">
-    </div>
-
-    <!-- Bootstrap Bundle with Popper --><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -449,51 +415,12 @@
                         if (labelUser) labelUser.innerText = isOn ? 'On' : 'Off';
                     }
                     
-                    // Alert logic
-                    if (sensor === 'motion' && isOn) {
-                        showToast('<i class="bi bi-person-walking me-2"></i> Виявлено рух в холі!', 'warning text-dark');
-                    } else if (sensor === 'door' && isOn) {
-                        showToast('<i class="bi bi-door-open me-2"></i> Вхідні двері ВІДЧИНЕНО!', 'danger');
-                    } else if (sensor === 'alarm' && isOn) {
-                        showToast('<i class="bi bi-shield-slash me-2"></i> СПРАЦЮВАЛА СИГНАЛІЗАЦІЯ!', 'danger text-white');
-                    }
-                    
                     // Dispatch custom event for child pages (like charts)
                     document.dispatchEvent(new CustomEvent('sensor_data_received', { detail: msg }));
                 });
             }
         });
-
-        // Global Toast Function
-        function showToast(message, type = 'primary') {
-            const container = document.getElementById('toastContainer');
-            const toastId = 'toast-' + Date.now();
-            
-            const btnClass = type.includes('warning') || type.includes('light') ? 'btn-close' : 'btn-close btn-close-white';
-            
-            const toastHtml = `
-                <div id="${toastId}" class="toast align-items-center text-bg-${type} border-0 mb-2 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="d-flex">
-                        <div class="toast-body fw-medium fs-6">
-                            ${message}
-                        </div>
-                        <button type="button" class="${btnClass} me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                </div>
-            `;
-            
-            container.insertAdjacentHTML('beforeend', toastHtml);
-            const toastElement = document.getElementById(toastId);
-            const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
-            toast.show();
-            
-            toastElement.addEventListener('hidden.bs.toast', () => {
-                toastElement.remove();
-            });
-        }
     </script>
-    
-    {% block modals %}{% endblock %}
 </body>
 
 </html>

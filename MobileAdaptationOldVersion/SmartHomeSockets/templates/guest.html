@@ -1,24 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="d-flex flex-column flex-md-row" style="min-height: 100vh; background-color: transparent;">
+<div class="d-flex" style="min-height: 100vh; background-color: transparent;">
 
-    <div class="d-flex d-md-none mobile-sidebar p-4 shadow-sm"
-        style="width: 100%; background-color: var(--custom-sidebar-bg); z-index: 10;">
-        <h2 style="font-weight: bold; margin: 0; font-size: 1.25rem;">Панель ДІМ</h2>
-        <div class="d-flex gap-2 ms-auto">
-            <a href="/guest" class="btn btn-sm btn-primary fw-bold shadow-sm"
-                style="background-color: #2e69ff; border: none; padding: 6px 12px; font-size: 0.85rem;">
-                <i class="bi bi-eye-fill"></i>
-            </a>
-            <a href="/login" class="btn btn-sm btn-danger fw-bold shadow-sm"
-                style="background-color: #b90e0a; border: none; padding: 6px 12px; font-size: 0.85rem;">
-                <i class="bi bi-box-arrow-right"></i>
-            </a>
-        </div>
-    </div>
-
-    <div class="d-none d-md-flex flex-column p-4 shadow-sm"
+    <div class="d-flex flex-column p-4 shadow-sm"
         style="width: 250px; background-color: var(--custom-sidebar-bg); z-index: 10;">
         <h2 class="mt-4 mb-4 text-body-emphasis" style="font-weight: bold;">Панель ДІМ</h2>
         <div class="nav flex-column nav-pills mb-auto">
@@ -37,17 +22,17 @@
 
     <div class="flex-grow-1 d-flex flex-column">
 
-        <div class="d-flex justify-content-between align-items-center py-4 px-4 px-md-5 shadow-sm mobile-header"
+        <div class="d-flex justify-content-between align-items-center py-4 px-5 shadow-sm"
             style="background-color: var(--custom-sidebar-bg); z-index: 5;">
             <h3 class="fw-bold m-0 text-body-emphasis"><i class="bi bi-display me-2"></i>Розумний будинок: Інформаційне
                 табло</h3>
             <div class="d-flex align-items-center">
-                <span class="me-3 fs-5 fw-bold text-body-emphasis d-none d-sm-inline">Гість</span>
+                <span class="me-3 fs-5 fw-bold text-body-emphasis">Гість</span>
                 <i class="bi bi-person-bounding-box fs-3 text-primary"></i>
             </div>
         </div>
 
-        <div class="p-3 p-md-5 mobile-content flex-grow-1" style="overflow-y: auto;">
+        <div class="p-5 flex-grow-1" style="overflow-y: auto;">
 
             {% if data.alarm != 'NONE' %}
             <div class="alert alert-warning shadow-sm border-0 p-4 mb-4 d-flex align-items-center"
@@ -62,7 +47,7 @@
             {% endif %}
 
             <div class="row g-4 mb-4">
-                <div class="col-md-6 col-12">
+                <div class="col-md-6">
                     <div class="card shadow-sm border-0 p-4" style="border-radius: 15px;">
                         <h4 class="fw-bold mb-4 text-body-emphasis"><i
                                 class="bi bi-thermometer-half me-2 text-danger"></i>Мікроклімат у приміщеннях</h4>
@@ -83,7 +68,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-6 col-12">
+                <div class="col-md-6">
                     <div class="card shadow-sm border-0 p-4" style="border-radius: 15px;">
                         <h4 class="fw-bold mb-4 text-body-emphasis"><i
                                 class="bi bi-lightning-charge me-2 text-warning"></i>Енергопостачання та Батарея</h4>
@@ -119,7 +104,7 @@
                             перегляд)</h4>
 
                         <div class="row g-3">
-                            <div class="col-md-4 col-12">
+                            <div class="col-md-4">
                                 <div class="p-3 border rounded-3 text-center bg-body-tertiary">
                                     <i class="bi bi-door-closed fs-2 text-secondary mb-2"></i>
                                     <h6 class="text-muted">Стан вхідних дверей</h6>
@@ -130,7 +115,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-4 col-12">
+                            <div class="col-md-4">
                                 <div class="p-3 border rounded-3 text-center bg-body-tertiary">
                                     <i class="bi bi-person-walking fs-2 text-secondary mb-2"></i>
                                     <h6 class="text-muted">Сенсор руху в холі</h6>
@@ -141,7 +126,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-4 col-12">
+                            <div class="col-md-4">
                                 <div class="p-3 border rounded-3 text-center bg-body-tertiary">
                                     <i class="bi bi-lock fs-2 text-secondary mb-2"></i>
                                     <h6 class="text-muted">Загальний режим периметру</h6>
