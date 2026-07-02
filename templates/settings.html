@@ -7,12 +7,10 @@
         style="width: 250px; background-color: var(--custom-sidebar-bg); z-index: 10;">
         <h2 class="mt-4 mb-4 text-body-emphasis" style="font-weight: bold;">Панель ДІМ</h2>
         <div class="nav flex-column nav-pills mb-auto">
-            <a href="/admin" class="btn mb-2 fw-bold text-start btn-secondary shadow-sm text-white"
-                style="background-color: rgba(255, 255, 255, 0.1); border: none;">
+            <a href="/admin" class="btn mb-2 fw-bold text-start btn-sidebar shadow-sm">
                 <i class="bi bi-sliders me-2"></i> Головна
             </a>
-            <a href="/logs" class="btn mb-2 fw-bold text-start btn-secondary shadow-sm text-white"
-                style="background-color: rgba(255, 255, 255, 0.1); border: none;">
+            <a href="/logs" class="btn mb-2 fw-bold text-start btn-sidebar shadow-sm">
                 <i class="bi bi-clock-history me-2"></i> Журнал подій
             </a>
             <a href="/settings" class="btn mb-2 fw-bold text-start btn-primary shadow-sm"
@@ -74,7 +72,7 @@
 
             <div class="table-responsive">
                 <table class="table table-hover align-middle border-0">
-                    <thead class="table-light">
+                    <thead class="adaptive-table-header">
                         <tr>
                             <th>Назва правила</th>
                             <th>Дія</th>
@@ -139,7 +137,7 @@
                         <input type="text" class="form-control" name="name" required placeholder="Напр., Полив саду">
                     </div>
 
-                    <div class="card bg-light border-0 mb-4">
+                    <div class="card bg-body-tertiary border-0 mb-4">
                         <div class="card-body" id="conditions-container">
                             <h6 class="fw-bold mb-3">Умови (IF)</h6>
                             <!-- Conditions will be injected here by JS -->
