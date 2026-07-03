@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center py-5" style="min-height: 100vh;">
+    <div class="card shadow-sm p-4" style="width: 100%; max-width: 450px; border-radius: 15px; border: none;">
+
+        <h3 class="text-center mb-4 fw-bold text-body-emphasis">SmartHome</h3>
+
+        <div class="text-center mb-4">
+            <span class="badge bg-light text-dark fs-5 px-4 py-2 border">Реєстрація</span>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger text-center">{{ error }}</div>
+        {% endif %}
+
+        <form method="post">
+
+            <div class="mb-3">
+                <label class="form-label text-muted small fw-bold mb-1">Ім'я користувача</label>
+                <input type="text" name="username" class="form-control form-control-lg" placeholder="Логін" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-muted small fw-bold mb-1">Електронна пошта</label>
+                <input type="email" name="email" class="form-control form-control-lg" placeholder="you@example.com" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-muted small fw-bold mb-1">Пароль</label>
+                <input type="password" name="password" class="form-control form-control-lg" placeholder="Пароль" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-muted small fw-bold mb-1">Підтвердження паролю</label>
+                <input type="password" name="confirm_password" class="form-control form-control-lg" placeholder="Повторіть пароль" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold mt-3"
+                style="background-color: #2e69ff; border: none;">
+                Зареєструватися
+            </button>
+        </form>
+
+        <div class="text-center mt-4">
+            <small class="text-muted">Вже маєте акаунт? <a href="{{ url_for('login') }}"
+                    class="text-decoration-none">Увійти</a></small>
+        </div>
+    </div>
+</div>
+{% endblock %}

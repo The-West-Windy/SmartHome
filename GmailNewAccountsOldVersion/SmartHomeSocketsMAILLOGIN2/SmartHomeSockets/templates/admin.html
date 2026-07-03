@@ -1,49 +1,80 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    .switch-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
+    .switch-label {
+        font-size: 1rem;
+        font-weight: 500;
+        min-width: 35px;
+        text-align: right;
+        transition: color 0.2s;
+    }
 
-<div class="d-flex flex-column flex-md-row" style="min-height: 100vh; background-color: transparent;">
+    .theme-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 26px;
+    }
 
-    <div class="d-flex d-md-none mobile-sidebar p-4 shadow-sm"
-        style="width: 100%; background-color: var(--custom-sidebar-bg); z-index: 10;">
-        <h2 style="font-weight: bold; margin: 0; font-size: 1.25rem;">Панель ДІМ</h2>
-        <div class="d-flex gap-2 ms-auto align-items-center">
-            <a href="/admin" class="btn btn-sm btn-primary fw-bold shadow-sm"
-                style="background-color: #2e69ff; border: none; padding: 6px 12px; font-size: 0.85rem;">
-                <i class="bi bi-sliders"></i>
-            </a>
-            
-            <div class="dropdown">
-                <button class="btn btn-sm btn-secondary fw-bold shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 6px 12px; font-size: 0.85rem; background-color: var(--sidebar-btn-bg); color: var(--custom-text-color); border: none;">
-                    <i class="bi bi-list"></i>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                    <li><a class="dropdown-item fw-medium py-2" href="/logs"><i class="bi bi-clock-history me-2 text-primary"></i>Журнал подій</a></li>
-                    <li><a class="dropdown-item fw-medium py-2" href="/settings"><i class="bi bi-gear-fill me-2 text-primary"></i>Налаштування</a></li>
-                </ul>
-            </div>
-            
-            <a href="/logout" class="btn btn-sm btn-danger fw-bold shadow-sm"
-                style="background-color: #b90e0a; border: none; padding: 6px 12px; font-size: 0.85rem;">
-                <i class="bi bi-box-arrow-right"></i>
-            </a>
-        </div>
-    </div>
+    .theme-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
 
-    <div class="d-none d-md-flex flex-column p-4 shadow-sm"
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #444;
+        border: 2px solid #666;
+        transition: .3s ease-in-out;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 3px;
+        bottom: 3px;
+        background-color: #ccc;
+        transition: .3s ease-in-out;
+        border-radius: 50%;
+    }
+
+    /* Активований стан повзунка (ON) */
+    input:checked+.slider {
+        background-color: #2e69ff;
+        border-color: #2e69ff;
+    }
+
+    input:checked+.slider:before {
+        transform: translateX(24px);
+        background-color: #fff;
+    }
+</style>
+
+<div class="d-flex" style="min-height: 100vh; background-color: transparent;">
+
+    <div class="d-flex flex-column p-4 shadow-sm"
         style="width: 250px; background-color: var(--custom-sidebar-bg); z-index: 10;">
         <h2 class="mt-4 mb-4 text-body-emphasis" style="font-weight: bold;">Панель ДІМ</h2>
         <div class="nav flex-column nav-pills mb-auto">
             <a href="/admin" class="btn mb-2 fw-bold text-start btn-primary shadow-sm"
                 style="background-color: #2e69ff; border: none;">
                 <i class="bi bi-sliders me-2"></i> Головна
-            </a>
-            <a href="/logs" class="btn mb-2 fw-bold text-start btn-sidebar shadow-sm">
-                <i class="bi bi-clock-history me-2"></i> Журнал подій
-            </a>
-            <a href="/settings" class="btn mb-2 fw-bold text-start btn-sidebar shadow-sm">
-                <i class="bi bi-gear-fill me-2"></i> Налаштування
             </a>
         </div>
         <div class="mt-auto">
@@ -56,17 +87,17 @@
 
     <div class="flex-grow-1 d-flex flex-column">
 
-        <div class="d-flex justify-content-between align-items-center py-4 px-4 px-md-5 shadow-sm mobile-header"
+        <div class="d-flex justify-content-between align-items-center py-4 px-5 shadow-sm"
             style="background-color: var(--custom-sidebar-bg); z-index: 5;">
             <h3 class="fw-bold m-0 text-body-emphasis"><i class="bi bi-building-gear me-2"></i>Розумний будинок:
                 Адміністратор</h3>
             <div class="d-flex align-items-center">
-                <span class="me-3 fs-5 fw-bold text-body-emphasis d-none d-sm-inline">Господар</span>
+                <span class="me-3 fs-5 fw-bold text-body-emphasis">Господар</span>
                 <i class="bi bi-person-circle fs-3 text-primary"></i>
             </div>
         </div>
 
-        <div class="p-3 p-md-5 mobile-content flex-grow-1" style="overflow-y: auto;">
+        <div class="p-5 flex-grow-1" style="overflow-y: auto;">
 
             {% if data.alarm != 'NONE' %}
             <div class="alert alert-danger shadow-sm border-0 p-4 mb-4 d-flex align-items-center"
@@ -81,7 +112,7 @@
             {% endif %}
 
             <div class="row g-4 mb-4">
-                <div class="col-md-4 col-12">
+                <div class="col-md-4">
                     <div class="card shadow-sm border-0 h-100 p-3" style="border-radius: 15px;">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -102,7 +133,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-4 col-12">
+                <div class="col-md-4">
                     <div class="card shadow-sm border-0 h-100 p-3" style="border-radius: 15px;">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -119,7 +150,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-4 col-12">
+                <div class="col-md-4">
                     <div class="card shadow-sm border-0 h-100 p-3" style="border-radius: 15px;">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -140,7 +171,7 @@
             </div>
 
             <div class="row g-4 mb-4">
-                <div class="col-md-6 col-12">
+                <div class="col-md-6">
                     <div class="card shadow-sm border-0 p-4" style="border-radius: 15px;">
                         <h4 class="fw-bold mb-4 text-body-emphasis"><i
                                 class="bi bi-thermometer-half me-2 text-danger"></i>Клімат та Моніторинг зон</h4>
@@ -204,7 +235,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-6 col-12">
+                <div class="col-md-6">
                     <div class="card shadow-sm border-0 p-4 h-100" style="border-radius: 15px;">
                         <h4 class="fw-bold mb-4 text-body-emphasis"><i
                                 class="bi bi-toggle-on me-2 text-primary"></i>Пряме керування реле та периферією</h4>
@@ -274,11 +305,11 @@
                     <div class="card shadow-sm border-0 p-4" style="border-radius: 15px;">
                         <h4 class="fw-bold mb-4 text-body-emphasis"><i class="bi bi-graph-up me-2 text-primary"></i>Аналітика за 24 години</h4>
                         <div class="row g-4">
-                            <div class="col-md-6 col-12">
+                            <div class="col-md-6">
                                 <h6 class="fw-bold text-muted text-center">Історія Температури (°C)</h6>
                                 <canvas id="temperatureChart"></canvas>
                             </div>
-                            <div class="col-md-6 col-12">
+                            <div class="col-md-6">
                                 <h6 class="fw-bold text-muted text-center">Історія Вологості (%)</h6>
                                 <canvas id="humidityChart"></canvas>
                             </div>
@@ -303,11 +334,7 @@
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
             .then(response => {
-                if (!response.ok) {
-                    if (typeof showToast !== 'undefined') showToast('Помилка виконання команди!', 'danger text-white');
-                } else {
-                    if (typeof showToast !== 'undefined') showToast(`Пристрій ${device.toUpperCase()} переведено в режим ${action.toUpperCase()}`, 'success text-white');
-                }
+                if (!response.ok) alert('Помилка виконання команди!');
             })
             .catch(error => console.error('Error:', error));
     }
@@ -329,13 +356,7 @@
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
             .then(response => {
-                if (!response.ok) {
-                    if (typeof showToast !== 'undefined') showToast('Помилка зміни режиму охорони!', 'danger text-white');
-                } else {
-                    const statusText = action === 'arm' ? 'СИСТЕМА ПІД ОХОРОНОЮ' : 'СИСТЕМУ ЗНЯТО З ОХОРОНИ';
-                    const toastType = action === 'arm' ? 'warning text-dark' : 'info text-white';
-                    if (typeof showToast !== 'undefined') showToast(`<i class="bi bi-shield-check me-2"></i> ${statusText}`, toastType);
-                }
+                if (!response.ok) alert('Помилка зміни режиму охорони!');
             })
             .catch(error => console.error('Error:', error));
     }
