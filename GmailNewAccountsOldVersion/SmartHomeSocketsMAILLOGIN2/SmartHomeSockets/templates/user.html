@@ -1,7 +1,70 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    .switch-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
+    .switch-label {
+        font-size: 1rem;
+        font-weight: 500;
+        min-width: 35px;
+        text-align: right;
+        transition: color 0.2s;
+    }
+
+    .theme-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 26px;
+    }
+
+    .theme-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #444;
+        border: 2px solid #666;
+        transition: .3s ease-in-out;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 3px;
+        bottom: 3px;
+        background-color: #ccc;
+        transition: .3s ease-in-out;
+        border-radius: 50%;
+    }
+
+    /* Активований стан повзунка (ON) */
+    input:checked+.slider {
+        background-color: #2e69ff;
+        border-color: #2e69ff;
+    }
+
+    input:checked+.slider:before {
+        transform: translateX(24px);
+        background-color: #fff;
+    }
+</style>
 
 <div class="d-flex flex-column flex-md-row" style="min-height: 100vh; background-color: transparent;">
 
@@ -11,15 +74,11 @@
         <div class="d-flex gap-2 ms-auto">
             <a href="/user" class="btn btn-sm btn-primary fw-bold shadow-sm"
                 style="background-color: #2e69ff; border: none; padding: 6px 12px; font-size: 0.85rem;">
-                <i class="bi bi-person-fill"></i>
-            </a>
-            <a href="/logs" class="btn btn-sm btn-sidebar fw-bold shadow-sm"
-                style="padding: 6px 12px; font-size: 0.85rem;">
-                <i class="bi bi-clock-history"></i>
+                <i class="bi bi-house-door-fill me-1"></i> Мешканець
             </a>
             <a href="/logout" class="btn btn-sm btn-danger fw-bold shadow-sm"
                 style="background-color: #b90e0a; border: none; padding: 6px 12px; font-size: 0.85rem;">
-                <i class="bi bi-box-arrow-right"></i>
+                <i class="bi bi-box-arrow-right me-1"></i> Вихід
             </a>
         </div>
     </div>
@@ -30,10 +89,7 @@
         <div class="nav flex-column nav-pills mb-auto">
             <a href="/user" class="btn mb-2 fw-bold text-start btn-primary shadow-sm"
                 style="background-color: #2e69ff; border: none;">
-                <i class="bi bi-person-fill me-2"></i> Мій кабінет
-            </a>
-            <a href="/logs" class="btn mb-2 fw-bold text-start btn-sidebar shadow-sm">
-                <i class="bi bi-clock-history me-2"></i> Журнал подій
+                <i class="bi bi-house-door-fill me-2"></i> Мешканець
             </a>
         </div>
         <div class="mt-auto">
@@ -48,8 +104,7 @@
 
         <div class="d-flex justify-content-between align-items-center py-4 px-4 px-md-5 shadow-sm mobile-header"
             style="background-color: var(--custom-sidebar-bg); z-index: 5;">
-            <h3 class="fw-bold m-0 text-body-emphasis"><i class="bi bi-person-workspace me-2"></i>Розумний будинок:
-                Керування</h3>
+            <h3 class="fw-bold m-0 text-body-emphasis"><i class="bi bi-person-workspace me-2"></i>Розумний будинок: Керування</h3>
             <div class="d-flex align-items-center">
                 <span class="me-3 fs-5 fw-bold text-body-emphasis d-none d-sm-inline">Мешканець</span>
                 <i class="bi bi-person-fill fs-3 text-primary"></i>
@@ -244,9 +299,7 @@
         })
             .then(response => {
                 if (!response.ok) {
-                    if (typeof showToast !== 'undefined') showToast('Помилка виконання команди!', 'danger text-white');
-                } else {
-                    if (typeof showToast !== 'undefined') showToast(`Пристрій ${device.toUpperCase()} переведено в режим ${action.toUpperCase()}`, 'success text-white');
+                    alert('Помилка виконання команди!');
                 }
             })
             .catch(error => {
