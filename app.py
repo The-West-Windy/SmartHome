@@ -187,6 +187,8 @@ smart_home_data = {
     "door": "CLOSED",
     "security_mode": "DISARM",
     "alarm": "NONE",
+    "safety_alarm": "NONE",
+    "rfid": "NONE",
     "room1_status": "OFF",  #збереження стану для першої кімнати
     "room2_status": "OFF",  #збереження стану для другої кімнати
     "pump_status": "OFF"    #збереження стану для помпи
@@ -215,6 +217,8 @@ def on_message(client, userdata, msg):
         "home/security/door": "door",
         "home/security/mode": "security_mode",
         "home/security/alarm": "alarm",
+        "home/security/rfid": "rfid",
+        "home/safety/alarm": "safety_alarm",
         "home/light/room1": "room1_status",
         "home/light/room2": "room2_status",
         "home/garden/pump": "pump_status"
@@ -244,8 +248,16 @@ def on_message(client, userdata, msg):
             else:
                 log_activity('alert', 'Main power lost. Running on battery')
                 send_email_alert("БЛЕКАУТ - Розумний Будинок", "Увага! Зникло живлення 220В. Систему переведено на ДБЖ.")
-        elif sensor_key == 'alarm' and payload == 'ON':
-            log_activity('alert', 'ALARM TRIGGERED!')
+        elif sensor_key == 'alarm':
+            if payload == 'MOTION_DETECTED':
+                log_activity('alert', 'INTRUSION ALARM TRIGGERED: Motion Detected!')
+            elif payload == 'ON':
+                log_activity('alert', 'ALARM TRIGGERED!')
+        elif sensor_key == 'safety_alarm':
+            if payload == 'FIRE_DETECTED':
+                log_activity('alert', 'FIRE ALARM TRIGGERED!')
+        elif sensor_key == 'rfid':
+            log_activity('access', f'RFID Card scanned: {payload}')
         elif sensor_key == 'gas':
             threshold = float(get_setting('gas_threshold', '4200'))
             try:
