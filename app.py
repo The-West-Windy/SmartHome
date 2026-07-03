@@ -35,7 +35,7 @@ def init_db():
         c.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('email_password', '')")
         c.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('email_receiver', '')")
         c.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('email_cooldown', '60')")
-        c.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('gas_threshold', '2200')")
+        c.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('gas_threshold', '4200')")
         
         conn.commit()
 
@@ -247,7 +247,7 @@ def on_message(client, userdata, msg):
         elif sensor_key == 'alarm' and payload == 'ON':
             log_activity('alert', 'ALARM TRIGGERED!')
         elif sensor_key == 'gas':
-            threshold = float(get_setting('gas_threshold', '2200'))
+            threshold = float(get_setting('gas_threshold', '4200'))
             try:
                 if float(payload) > threshold:
                     send_email_alert("КРИТИЧНА ТРИВОГА - ПОЖЕЖА", f"Датчик зафіксував критичний рівень диму/газу ({payload} PPM) в будинку!")
