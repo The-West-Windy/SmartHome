@@ -10,18 +10,31 @@
             <span class="badge bg-light text-dark fs-5 px-4 py-2 border">Реєстрація</span>
         </div>
 
+        {% if error %}
+        <div class="alert alert-danger text-center">{{ error }}</div>
+        {% endif %}
+
         <form method="post">
 
-
-            {% for field in form %}
             <div class="mb-3">
-                <label class="form-label text-muted small fw-bold mb-1">{{ field.label }}</label>
-                {{ field }}
-                {% if field.errors %}
-                <div class="text-danger small mt-1">{{ field.errors|striptags }}</div>
-                {% endif %}
+                <label class="form-label text-muted small fw-bold mb-1">Ім'я користувача</label>
+                <input type="text" name="username" class="form-control form-control-lg" placeholder="Логін" required>
             </div>
-            {% endfor %}
+
+            <div class="mb-3">
+                <label class="form-label text-muted small fw-bold mb-1">Електронна пошта</label>
+                <input type="email" name="email" class="form-control form-control-lg" placeholder="you@example.com" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-muted small fw-bold mb-1">Пароль</label>
+                <input type="password" name="password" class="form-control form-control-lg" placeholder="Пароль" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-muted small fw-bold mb-1">Підтвердження паролю</label>
+                <input type="password" name="confirm_password" class="form-control form-control-lg" placeholder="Повторіть пароль" required>
+            </div>
 
             <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold mt-3"
                 style="background-color: #2e69ff; border: none;">

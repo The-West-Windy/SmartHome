@@ -5,6 +5,7 @@ import sqlite3
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from werkzeug.security import generate_password_hash, check_password_hash
 import time
 import json
 import threading
@@ -27,6 +28,12 @@ def init_db():
                       event_type TEXT,
                       message TEXT,
                       timestamp DATETIME DEFAULT (datetime('now', 'localtime')))''')
+        c.execute('''CREATE TABLE IF NOT EXISTS users
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      username TEXT UNIQUE NOT NULL,
+                      email TEXT UNIQUE NOT NULL,
+                      password TEXT NOT NULL,
+                      role TEXT DEFAULT 'user')''')
         c.execute('''CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)''')
         c.execute('''CREATE TABLE IF NOT EXISTS rules (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, conditions_json TEXT, action_device TEXT, action_state TEXT, action_duration INTEGER, is_active BOOLEAN)''')
         
@@ -103,6 +110,43 @@ def send_email_alert(subject, body):
             print(f"Помилка відправки Email: {e}")
             
     threading.Thread(target=send_async).start()
+
+def send_registration_email(to_email, username):
+    sender = get_setting('email_sender')
+    password = get_setting('email_password')
+    
+    if not sender or not password:
+        print("Email settings not configured. Cannot send registration email.")
+        return False
+
+    subject = "Реєстрація успішна - Розумний Будинок"
+    body = (
+        f"Вітаємо, {username}!\n\n"
+        f"Ваш акаунт у системі \"Розумний будинок\" успішно створено.\n\n"
+        f"Логін: {username}\n"
+        f"Email: {to_email}\n\n"
+        f"Тепер ви можете увійти в систему, використовуючи ваш логін та пароль."
+    )
+
+    msg = MIMEMultipart()
+    msg['From'] = sender
+    msg['To'] = to_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+
+    def send_async():
+        try:
+            server = smtplib.SMTP('smtp.gmail.com', 587)
+            server.starttls()
+            server.login(sender, password)
+            server.send_message(msg)
+            server.quit()
+            print(f"[{time.strftime('%H:%M:%S')}] Registration email successfully sent to {to_email}")
+        except Exception as e:
+            print(f"Помилка відправки Email (реєстрація): {e}")
+            
+    threading.Thread(target=send_async).start()
+    return True
 
 def revert_action(device, old_state):
     topic_map_rev = {
@@ -294,21 +338,37 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password') #зчитуємо пароль з форми
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '') #зчитуємо пароль з форми
 
-        #перевірка логіну та паролю
+        #перевірка логіну та паролю (демо-акаунти)
         if username == 'admin' and password == 'admin':
             session['role'] = 'admin'
+            session.pop('username', None)
             return redirect('/admin')
-        elif username == 'user' and password == 'user':
-            session['role'] = 'user'
-            return redirect('/user')
         elif username == 'guest': #пускає без пароля за логіном guest
             session['role'] = 'guest'
+            session.pop('username', None)
             return redirect('/guest')
-            
-        return render_template('login.html', error="Невірний логін або пароль!")
+
+        # Перевірка серед зареєстрованих користувачів у базі даних
+        with sqlite3.connect('smarthome.db') as conn:
+            c = conn.cursor()
+            c.execute("SELECT username, password, role FROM users WHERE username = ? OR email = ?",
+                      (username, username))
+            row = c.fetchone()
+
+        if row is None:
+            return render_template('login.html', error="Користувача з таким логіном не знайдено!")
+
+        db_username, password_hash, role = row
+        if not check_password_hash(password_hash, password):
+            return render_template('login.html', error="Невірний пароль!")
+
+        session['role'] = role
+        session['username'] = db_username
+        return redirect(f'/{role}')
+
     return render_template('login.html')
 
 
@@ -321,7 +381,51 @@ def logout():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        return redirect('/login')
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+
+        error = None
+        if not username or not email or not password or not confirm_password:
+            error = "Будь ласка, заповніть усі поля!"
+        elif '@' not in email or '.' not in email:
+            error = "Введіть коректну електронну адресу!"
+        elif password != confirm_password:
+            error = "Паролі не співпадають!"
+        else:
+            with sqlite3.connect('smarthome.db') as conn:
+                c = conn.cursor()
+                c.execute("SELECT id FROM users WHERE email = ?", (email,))
+                if c.fetchone():
+                    error = "Ця електронна пошта вже використовується!"
+                else:
+                    c.execute("SELECT id FROM users WHERE username = ?", (username,))
+                    if c.fetchone():
+                        error = "Це ім'я користувача вже зайняте!"
+
+        if error:
+            return render_template('register.html', error=error)
+
+        password_hash = generate_password_hash(password)
+        try:
+            with sqlite3.connect('smarthome.db') as conn:
+                c = conn.cursor()
+                c.execute("INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)",
+                          (username, email, password_hash, 'user'))
+                conn.commit()
+        except sqlite3.IntegrityError:
+            return render_template('register.html', error="Ця електронна пошта або ім'я користувача вже використовується!")
+
+        # Надсилаємо email-підтвердження про успішну реєстрацію
+        email_sent = send_registration_email(email, username)
+        if email_sent:
+            success_message = "Реєстрація успішна! Лист-підтвердження надіслано на вашу пошту. Тепер ви можете увійти."
+        else:
+            success_message = "Реєстрація успішна! Тепер ви можете увійти. (Не вдалося надіслати лист-підтвердження.)"
+
+        return render_template('login.html', messages=[success_message])
+
     return render_template('register.html')
 
 
