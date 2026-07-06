@@ -404,14 +404,38 @@
                         if (statusHeader) {
                             const view = statusHeader.dataset.view;
                             if (view === 'admin') {
-                                statusHeader.innerText = value === 'ARM' ? 'ПІД ОХОРОНОЮ' : 'ЗНЯТО З ОХОРОНИ';
-                                statusHeader.className = value === 'ARM' ? 'fw-bold text-warning' : 'fw-bold text-success';
+                                if (value === 'ARM') {
+                                    statusHeader.innerText = 'ПІД ОХОРОНОЮ';
+                                    statusHeader.className = 'fw-bold text-warning';
+                                } else if (value === 'NIGHT') {
+                                    statusHeader.innerText = 'НІЧНИЙ РЕЖИМ';
+                                    statusHeader.className = 'fw-bold text-info';
+                                } else {
+                                    statusHeader.innerText = 'ЗНЯТО З ОХОРОНИ';
+                                    statusHeader.className = 'fw-bold text-success';
+                                }
                             } else if (view === 'user') {
-                                statusHeader.innerText = value === 'ARM' ? 'АКТИВНА' : 'ВИМКНЕНА';
-                                statusHeader.className = value === 'ARM' ? 'fw-bold text-warning' : 'fw-bold text-secondary';
+                                if (value === 'ARM') {
+                                    statusHeader.innerText = 'АКТИВНА';
+                                    statusHeader.className = 'fw-bold text-warning';
+                                } else if (value === 'NIGHT') {
+                                    statusHeader.innerText = 'НІЧНИЙ РЕЖИМ';
+                                    statusHeader.className = 'fw-bold text-info';
+                                } else {
+                                    statusHeader.innerText = 'ВИМКНЕНА';
+                                    statusHeader.className = 'fw-bold text-secondary';
+                                }
                             } else if (view === 'guest') {
-                                statusHeader.innerText = value === 'ARM' ? 'РЕЖИМ ОХОРОНИ' : 'БЕЗ ОХОРОНИ';
-                                statusHeader.className = value === 'ARM' ? 'fw-bold m-0 text-warning' : 'fw-bold m-0 text-secondary';
+                                if (value === 'ARM') {
+                                    statusHeader.innerText = 'РЕЖИМ ОХОРОНИ';
+                                    statusHeader.className = 'fw-bold m-0 text-warning';
+                                } else if (value === 'NIGHT') {
+                                    statusHeader.innerText = 'НІЧНИЙ РЕЖИМ';
+                                    statusHeader.className = 'fw-bold m-0 text-info';
+                                } else {
+                                    statusHeader.innerText = 'БЕЗ ОХОРОНИ';
+                                    statusHeader.className = 'fw-bold m-0 text-secondary';
+                                }
                             }
                         }
                     }
@@ -445,15 +469,16 @@
                         }
                     }
                     
-                    // Toggle switches states (room1, room2, pump) from hardware feedback
-                    if (sensor === 'room1_status' || sensor === 'room2_status' || sensor === 'pump_status') {
-                        const device = sensor.replace('_status', '');
+                    // Toggle switches states (room1, room2, pump, door) from hardware feedback
+                    if (sensor === 'room1_status' || sensor === 'room2_status' || sensor === 'pump_status' || sensor === 'door') {
+                        let device = sensor.replace('_status', '');
+                        
                         const toggleAdmin = document.getElementById('switch-' + device);
                         const toggleUser = document.getElementById('switch-' + device + '-u');
                         const labelAdmin = document.getElementById('lbl-' + device);
                         const labelUser = document.getElementById('lbl-' + device + '-u');
                         
-                        const isOn = value === 'ON';
+                        const isOn = (value === 'ON' || value === 'CLOSED');
                         
                         if (toggleAdmin) toggleAdmin.checked = isOn;
                         if (toggleUser) toggleUser.checked = isOn;
@@ -462,11 +487,12 @@
                     }
                     
                     // Alert logic
-                    if (sensor === 'motion' && isOn) {
+                    const isAlertOn = (value === 'ON' || value === 'OPEN' || value === 'MOTION_DETECTED');
+                    if (sensor === 'motion' && isAlertOn) {
                         showToast('<i class="bi bi-person-walking me-2"></i> Виявлено рух в холі!', 'warning text-dark');
-                    } else if (sensor === 'door' && isOn) {
+                    } else if (sensor === 'door' && isAlertOn) {
                         showToast('<i class="bi bi-door-open me-2"></i> Вхідні двері ВІДЧИНЕНО!', 'danger');
-                    } else if (sensor === 'alarm' && isOn) {
+                    } else if (sensor === 'alarm' && isAlertOn) {
                         showToast('<i class="bi bi-shield-slash me-2"></i> СПРАЦЮВАЛА СИГНАЛІЗАЦІЯ!', 'danger text-white');
                     }
                     

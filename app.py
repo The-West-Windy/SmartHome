@@ -476,6 +476,14 @@ def control_device(device, action):
         if session.get('role') == 'admin':
             mqtt_client.publish("home/security/mode", action.upper())
             log_activity('action', f"Security mode changed to {action.upper()} by Admin")
+    elif device == "door":
+        # action is 'on' or 'off' from the switch
+        cmd = "LOCK" if action.lower() == "on" else "UNLOCK"
+        new_state = "CLOSED" if cmd == "LOCK" else "OPEN"
+        mqtt_client.publish("home/security/door_cmd", cmd)
+        smart_home_data["door"] = new_state
+        socketio.emit('sensor_update', {'sensor': 'door', 'value': new_state})
+        log_activity('action', f"Door {cmd}ED by {user_role}")
 
     #якщо запит прийшов через JS, повертаємо просто "OK" без перезавантаження сторінки
     if request.referrer is None or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
